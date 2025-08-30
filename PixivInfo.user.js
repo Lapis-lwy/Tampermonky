@@ -108,12 +108,12 @@ function loginRes(login, loginUiElem) {
         }
     });
 }
-function loginEvent(url, loginUiElem) {
+function loginEvent(url, loginUiElem, event) {
     if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password"))) {
         GM_setValue("username", loginUiElem.userElem.value);
         GM_setValue("password", loginUiElem.passwordElem.value);
     }
-    return loginRes(login(url), loginUiElem);
+    return loginRes(login(url), loginUiElem).finally(event());
 }
 function infoUi(div, url, loginUiElem) {
     GM_setValue("auth", "");
@@ -139,13 +139,13 @@ function infoUi(div, url, loginUiElem) {
             }
         })
     }
-    loginEvent(url,loginUiElem).finally(() => clickEvent(url, tip));
+    loginEvent(url, loginUiElem,() => clickEvent(url, tip));
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
             return;
         }
-        loginEvent(url,loginUiElem).finally(() => clickEvent(url, tip));
+        loginEvent(url, loginUiElem, () => clickEvent(url, tip));
     };
 
 }
