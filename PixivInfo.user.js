@@ -113,7 +113,7 @@ function loginEvent(url, loginUiElem, event) {
         GM_setValue("username", loginUiElem.userElem.value);
         GM_setValue("password", loginUiElem.passwordElem.value);
     }
-    return loginRes(login(url), loginUiElem).finally(event());
+    return loginRes(login(url), loginUiElem).finally(event);
 }
 function infoUi(div, url, loginUiElem) {
     GM_setValue("auth", "");
