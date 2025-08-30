@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      4.1
+// @version      4.2
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -108,6 +108,13 @@ function loginRes(login, loginUiElem) {
         }
     });
 }
+function loginEvent(url, loginUiElem) {
+    if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password"))) {
+        GM_setValue("username", loginUiElem.userElem.value);
+        GM_setValue("password", loginUiElem.passwordElem.value);
+    }
+    return loginRes(login(url), loginUiElem);
+}
 function infoUi(div, url, loginUiElem) {
     GM_setValue("auth", "");
     let tip = document.createElement("h2");
@@ -132,20 +139,13 @@ function infoUi(div, url, loginUiElem) {
             }
         })
     }
-    let loginEvent = () => {
-        if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password"))) {
-            GM_setValue("username", loginUiElem.userElem.value);
-            GM_setValue("password", loginUiElem.passwordElem.value);
-        }
-        loginRes(login(url), loginUiElem).finally(() => clickEvent(url, tip));
-    }
-    loginEvent();
+    loginEvent(url,loginUiElem).finally(() => clickEvent(url, tip));
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
             return;
         }
-        loginEvent();
+        loginEvent(url,loginUiElem).finally(() => clickEvent(url, tip));
     };
 
 }
@@ -193,7 +193,14 @@ function pixiv(url, pixivId) {
     return sendReq(url, 0, pixivId);
 }
 function infoList(div, url, loginUiElem) {
-    console.log(window.location.host);
+    let hst_name = console.log(window.location.host);
+    loginUiElem.buttonElem.onclick = () => {
+        if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
+            alert("输入框为空！");
+            return;
+        }
+
+    };
 }
 (function () {
     'use strict';
@@ -207,7 +214,6 @@ function infoList(div, url, loginUiElem) {
     document.body.prepend(div);
     let regex_danbooru = /posts/g;
     let regex_pixiv = /(tags|artworks)/g;
-    console.log(path);
     if (regex_danbooru.test(path) || regex_pixiv.test(path)) {
         regex_danbooru = /posts\//g;
         regex_pixiv = /artworks/g;
