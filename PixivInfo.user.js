@@ -114,7 +114,7 @@ function infoUi(div, url, loginUiElem) {
     tip.align = "center";
     tip.style.margin = "0px";
     tip.style.padding = "12px";
-    tip.id="tip";
+    tip.id = "tip";
     div.append(tip);
     let clickEvent = function (url, tip) {
         if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password"))) {
@@ -192,7 +192,9 @@ function sendReq(url, flag, picId) {
 function pixiv(url, pixivId) {
     return sendReq(url, 0, pixivId);
 }
-function infoList(div, url, loginUiElem) { }
+function infoList(div, url, loginUiElem) {
+    console.log(window.location.host);
+}
 (function () {
     'use strict';
     GM_setValue("auth", "");
