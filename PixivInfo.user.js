@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      4.4
+// @version      4.5
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -193,8 +193,8 @@ function pixiv(url, pixivId) {
     return sendReq(url, 0, pixivId);
 }
 function infoList(url, loginUiElem) {
-    let hostName = console.log(window.location.host);
-    let listEvent = (url,)=>{};
+    let hostName = window.location.host;
+    let listEvent = (url)=>{};
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
@@ -224,7 +224,7 @@ function infoList(url, loginUiElem) {
         if (regexDanbooru.test(path) || regexPixiv.test(path))
             infoUi(div, url, loginUiElem);
         else
-            infoList(div, url, loginUiElem);
+            infoList(url, loginUiElem);
     }
     history.pushState = _wr('pushState');
     window.addEventListener('pushState', function (e) {
