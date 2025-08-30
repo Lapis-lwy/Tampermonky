@@ -194,7 +194,8 @@ function pixiv(url, pixivId) {
 }
 function infoList(url, loginUiElem) {
     let hostName = window.location.host;
-    let listEvent = (url)=>{};
+    let listEvent = ()=>{};
+    loginEvent(url, loginUiElem, () => { listEvent() });
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
