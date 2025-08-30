@@ -11,8 +11,8 @@
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @connect      file.125114.xyz
-// @updateURL    https://raw.githubusercontent.com/Lapis-lwy/Script/refs/heads/main/Tampermonky/PixivInfo.js
-// @downloadURL  https://raw.githubusercontent.com/Lapis-lwy/Script/refs/heads/main/Tampermonky/PixivInfo.js
+// @updateURL    https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.js
+// @downloadURL  https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.js
 // ==/UserScript==
 //TODO:增加打开图片列表时显示是否在本地有图片
 let _wr = function (type) {
