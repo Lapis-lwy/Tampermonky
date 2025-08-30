@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      4.3
+// @version      4.4
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -123,7 +123,7 @@ function infoUi(div, url, loginUiElem) {
     tip.style.padding = "12px";
     tip.id = "tip";
     div.append(tip);
-    let clickEvent = function (url, tip) {
+    let clickEvent = (url, tip) => {
         if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password"))) {
             tip.textContent = "⚠️您还未登录！";
             return;
@@ -139,7 +139,7 @@ function infoUi(div, url, loginUiElem) {
             }
         })
     }
-    loginEvent(url, loginUiElem,() => clickEvent(url, tip));
+    loginEvent(url, loginUiElem, () => clickEvent(url, tip));
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
@@ -192,15 +192,19 @@ function sendReq(url, flag, picId) {
 function pixiv(url, pixivId) {
     return sendReq(url, 0, pixivId);
 }
-function infoList(div, url, loginUiElem) {
-    let hst_name = console.log(window.location.host);
+function infoList(url, loginUiElem) {
+    let hostName = console.log(window.location.host);
+    let listEvent = (url,)=>{};
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
             return;
         }
-
+        loginEvent(url, loginUiElem, () => { listEvent() });
     };
+
+    //if(hostName === "www.pixiv.net")
+
 }
 (function () {
     'use strict';
@@ -212,12 +216,12 @@ function infoList(div, url, loginUiElem) {
     div.id = "infoDisplay";
     let loginUiElem = loginUi(div);
     document.body.prepend(div);
-    let regex_danbooru = /posts/g;
-    let regex_pixiv = /(tags|artworks)/g;
-    if (regex_danbooru.test(path) || regex_pixiv.test(path)) {
-        regex_danbooru = /posts\//g;
-        regex_pixiv = /artworks/g;
-        if (regex_danbooru.test(path) || regex_pixiv.test(path))
+    let regexDanbooru = /posts/g;
+    let regexPixiv = /(tags|artworks)/g;
+    if (regexDanbooru.test(path) || regexPixiv.test(path)) {
+        regexDanbooru = /posts\//g;
+        regexPixiv = /artworks/g;
+        if (regexDanbooru.test(path) || regexPixiv.test(path))
             infoUi(div, url, loginUiElem);
         else
             infoList(div, url, loginUiElem);
@@ -232,7 +236,7 @@ function infoList(div, url, loginUiElem) {
         if (path == "artworks") {
             infoUi(div, url, loginUiElem);
         } else if (path == "tags") {
-            infoList(div, url, loginUiElem);
+            infoList(url, loginUiElem);
         } else {
             div.innerHTML = "";
             div.style.display = "none";
