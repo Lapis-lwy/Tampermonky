@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      5.1
+// @version      5.2
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -194,29 +194,28 @@ function pixiv(url, pixivId) {
 }
 function infoList(url, loginUiElem) {
     let hostName = window.location.host;
-    const isElementLoaded = async selector => {
-        while (document.querySelector(selector) === null) {
+    GM_setValue("start", 0);//初始为0，每滚动一次+24
+    const isElementLoaded = async (selector, start) => {
+        while (document.querySelectorAll(selector)[start] === undefined || document.querySelectorAll(selector)[start].src === undefined) {
             await new Promise(res => requestAnimationFrame(res))
         }
         return await new Promise(res => {
             res(document.querySelectorAll(selector));
         })
     };
-    let picClass;
     let listEvent = () => {
         if (hostName === "www.pixiv.net") {
-            isElementLoaded(".sc-57c4d86c-5").then((res) => {
-                picClass = res;
-                console.log(picClass.length);
-                let target;
-                for (let i = 0; i < picClass.length; i++) {
-                    target = picClass[i];
+            isElementLoaded(".sc-324476b7-10", GM_getValue("start")).then((res) => {
+                for (let i = 0; i < res.length; i++) {
+                    console.log(res[i].src);
                 }
             })
         }
-
+        if(GM_getValue("start")<60)
+            GM_setValue("start", GM_getValue("start")+24);
     };
-    loginEvent(url, loginUiElem, () => { listEvent() });
+    loginEvent(url, loginUiElem, () =>  listEvent() );
+    document.addEventListener("scroll", () =>  listEvent() );
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
