@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      5.4
+// @version      5.5
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -118,7 +118,7 @@ function loginEvent(url, loginUiElem, event) {
 function infoUi(div, url, loginUiElem) {
     GM_setValue("auth", "");
     let tip = document.createElement("h2");
-    tip.align = "center";
+    tip.style.textAlign = "center";
     tip.style.margin = "0px";
     tip.style.padding = "12px";
     tip.id = "tip";
@@ -128,12 +128,12 @@ function infoUi(div, url, loginUiElem) {
             tip.textContent = "⚠️您还未登录！";
             return;
         }
-        search(url + "search/").then(() => {
-            if (GM_getValue("download") === 0) {
+        search(url + "search/").then((res) => {
+            if (res === 0) {
                 tip.textContent = "✔️本图片尚未下载";
                 tip.style.color = "green";
             }
-            if (GM_getValue("download") === 1) {
+            if (res === 1) {
                 tip.textContent = "❌️本图片已下载";
                 tip.style.color = "red";
             }
@@ -159,8 +159,9 @@ async function search(url) {
         let fullUrl = document.querySelector("#post-info-source").textContent;
         if (fullUrl.split(" ").at(1).split("/").at(0) === "pixiv.net") {//Pixiv来源
             picId = fullUrl.split(" ").at(1).split("/").at(-1).split(" ").at(0);
-            await pixiv(url, picId);
-            if (GM_getValue("download") === 1) return await new Promise(res => { res() });
+            await pixiv(url, picId).then(async res => {
+                if (res === 1) return await new Promise(res => { res() });
+            });
         }
         if (document.querySelector("#image").src.split("/")[3] === "sample")
             picId = document.querySelector("#image").src.split("-").at(-1).split(".").at(0);
@@ -177,20 +178,24 @@ function sendReq(url, flag, picId) {
             }, onload: (response) => {
                 let arr = new Set(JSON.parse(response.responseText).map(function (elem) { return elem.path.split("_").at(flag).split(".").at(0).split("/").at(-1) }));
                 console.log(arr);
-                GM_setValue("download", 0);
+                let download = 0;
                 for (let elem of arr) {
                     if (elem === picId) {
-                        GM_setValue("download", 1);
+                        download = 1;
                         break;//检查id是否完全相等，有些id是另一个id的一部分
                     }
                 }
-                res();
+                res(download);
             }
         })
     })
 }
 function pixiv(url, pixivId) {
     return sendReq(url, 0, pixivId);
+}
+
+async function searchList(url) {
+
 }
 function infoList(url, loginUiElem) {
     let hostName = window.location.host;
@@ -203,23 +208,29 @@ function infoList(url, loginUiElem) {
             res(document.querySelectorAll(selector));
         })
     };
-    let listEvent = () => {
+    let listEvent = url => {
+        if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
+            return;
         if (hostName === "www.pixiv.net") {
             isElementLoaded(".sc-324476b7-10", GM_getValue("start")).then((res) => {
                 for (let i = 0; i < res.length; i++) {
-                    let status = document.createElement("div");
-                    status.textContent="24323432";
-                    status.id="status"+i;
-                    if(!document.getElementById("status"+i))
-                        res[i].parentNode.parentNode.parentNode.prepend(status);
+                    if (!document.getElementById("status" + i)) {
+                        let status = document.createElement("div");
+                        searchList(url + "search/").then(() => {
+                            status.textContent = "✔️";
+                            status.style.textAlign = "center";
+                            status.id = "status" + i;
+                            res[i].parentNode.parentNode.parentNode.prepend(status);
+                        });
+                    }
                 }
             })
         }
         if (GM_getValue("start") < 60)
             GM_setValue("start", GM_getValue("start") + 18);
     };
-    loginEvent(url, loginUiElem, () => listEvent());
-    window.addEventListener("scroll", () => listEvent());
+    loginEvent(url, loginUiElem, () => listEvent(url));
+    window.addEventListener("scroll", () => listEvent(url));
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
