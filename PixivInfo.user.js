@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      4.9
+// @version      5.0
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -196,21 +196,24 @@ function infoList(url, loginUiElem) {
     let hostName = window.location.host;
     const isElementLoaded = async selector => {
         while (document.querySelector(selector) === null) {
-            await new Promise(resolve => requestAnimationFrame(resolve))
+            await new Promise(res => requestAnimationFrame(res))
         }
-        return document.querySelector(selector);
+        return await new Promise(res=>{
+            document.querySelector(selector);
+            res();
+        })
     };
     let picClass;
     let listEvent = () => {
         if (hostName === "www.pixiv.net") {
-            isElementLoaded(".sc-57c4d86c-5 gTqtlQ").then((selector)=>{
-                picClass=selector;
+            isElementLoaded(".sc-57c4d86c-5 gTqtlQ").then((selector) => {
+                picClass = selector;
+                console.log(picClass.length);
+                let target;
+                for (let i = 0; i < picClass.length; i++) {
+                    target = picClass[i];
+                }
             })
-            console.log(picClass.length);
-            let target;
-            for (let i = 0; i < picClass.length; i++) {
-                target = picClass[i];
-            }
         }
 
     };
