@@ -160,7 +160,7 @@ async function search(url) {
         if (fullUrl.split(" ").at(1).split("/").at(0) === "pixiv.net") {//Pixiv来源
             picId = fullUrl.split(" ").at(1).split("/").at(-1).split(" ").at(0);
             await pixiv(url, picId).then(async res => {
-                if (res === 1) return await new Promise(res => { res() });
+                if (res === 1) return await new Promise(res => { res(1) });
             });
         }
         if (document.querySelector("#image").src.split("/")[3] === "sample")
