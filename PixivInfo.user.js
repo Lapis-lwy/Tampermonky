@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      4.7
+// @version      4.8
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -195,15 +195,26 @@ function pixiv(url, pixivId) {
 function infoList(url, loginUiElem) {
     let hostName = window.location.host;
     let picClass;
-    let listEvent = () => {
-        document.addEventListener("DOMContentLoaded", () => {
-            if (hostName === "www.pixiv.net")
-                picClass = document.getElementsByClassName("sc-324476b7-10 bEKCzM");
-            console.log(picClass.length); // 确保元素已加载
-        });
-        for (let i = 0; i < picClass.length; i++) {
-            picClass[i].src = "0"
+    const config = { attributes: true, childList: true, subtree: true };
+    const appearEvent = (mutationsList, observer) => {
+        for (let mutation of mutationsList) {
+            if (mutation.type === "childList") {
+                console.log("A child node has been added or removed.");
+            }
         }
+    }
+    let listEvent = () => {
+        if (hostName === "www.pixiv.net") {
+            picClass = document.getElementsByClassName("sc-57c4d86c-5 gTqtlQ");
+            let target;
+            for (let i = 0; i < picClass.length; i++) {
+                target = picClass[i];
+                const observer = new MutationObserver(appearEvent);
+                observer.observe(target,config);
+                observer.disconnect();
+            }
+        }
+
     };
     loginEvent(url, loginUiElem, () => { listEvent() });
     loginUiElem.buttonElem.onclick = () => {
