@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      5.7
+// @version      5.8
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -265,14 +265,13 @@ function infoList(url, loginUiElem, hostName, page) {
     document.body.prepend(div);
     let regexDanbooru = /posts/g;
     let regexPixiv = /(tags|artworks)/g;
-    let page = window.location.search.split("p=")[1].split("&")[0];
     if (regexDanbooru.test(path) || regexPixiv.test(path)) {
         regexDanbooru = /posts\//g;
         regexPixiv = /artworks/g;
         if (regexDanbooru.test(path) || regexPixiv.test(path))
             infoUi(div, url, loginUiElem);
         else
-            infoList(url, loginUiElem, window.location.host, page);
+            infoList(url, loginUiElem, window.location.host, window.location.search.split("p=")[1].split("&")[0]);
     }
     history.pushState = _wr('pushState');
     window.addEventListener('pushState', function () {
@@ -284,7 +283,7 @@ function infoList(url, loginUiElem, hostName, page) {
         if (path == "artworks") {
             infoUi(div, url, loginUiElem);
         } else if (path == "tags") {
-            infoList(url, loginUiElem, window.location.host, page);
+            infoList(url, loginUiElem, window.location.host, window.location.search.split("p=")[1].split("&")[0]);
         } else {
             div.innerHTML = "";
             div.style.display = "none";
