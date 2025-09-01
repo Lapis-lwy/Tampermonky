@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      5.5
+// @version      5.6
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -221,18 +221,18 @@ function infoList(url, loginUiElem) {
         if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
             return;
         if (hostName === "www.pixiv.net") {
-            isElementLoaded(".sc-57c4d86c-6", GM_getValue("start")).then(res => {
-                for (let i = 0; i < res.length; i++) {
+            isElementLoaded(".sc-57c4d86c-6", GM_getValue("start")).then(res1 => {
+                for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status" + i)) {
                         let status = document.createElement("div");
-                        searchList(url + "search/", res[i].href).then(res => {
-                            if(res===0){
+                        searchList(url + "search/", res1[i].href).then(res2 => {
+                            if(res2===0){
                                 status.textContent = "✔️";
                             }else{
                                 status.textContent = "❌️";
                             }
                             status.id = "status" + i;
-                            res[i].parentNode.append(status);
+                            res1[i].parentNode.append(status);
                         });
                     }
                 }
