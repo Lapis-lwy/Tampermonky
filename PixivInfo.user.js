@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      5.9
+// @version      6.0
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -226,30 +226,24 @@ function infoList(url, loginUiElem, hostName) {
         if (hostName === "www.pixiv.net") {
             isElementLoaded(".sc-57c4d86c-6", GM_getValue("start")).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
-                    let status = document.createElement("div");
-                    searchList(url + "search/", res1[i].href).then(res2 => {
-                        if (res2 === 0) {
-                            status.textContent = "✔️";
-                        } else {
-                            status.textContent = "❌️";
-                        }
-                        status.id = "status_" + i;
-                        if (document.getElementById("status_" + i))
-                            document.getElementById("status_" + i).innerHTML = "";
-                        res1[i].parentNode.append(status);
-                    });
+                    if (document.getElementById("status_" + i)) {
+                        let status = document.createElement("div");
+                        searchList(url + "search/", res1[i].href).then(res2 => {
+                            if (res2 === 0) {
+                                status.textContent = "✔️";
+                            } else {
+                                status.textContent = "❌️";
+                            }
+                            status.id = "status_" + i;
+                            res1[i].parentNode.append(status);
+                        });
+                    }
                 }
             })
         } else {
-
         }
     };
     loginEvent(url, loginUiElem, () => listEvent(url));
-    window.addEventListener("scroll", () => {
-        listEvent(url);
-        if (GM_getValue("start") < 60)
-            GM_setValue("start", GM_getValue("start") + 18);
-    });
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
