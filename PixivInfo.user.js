@@ -206,7 +206,7 @@ async function searchList(url, href) {
 
     }
 }
-function infoList(url, loginUiElem, hostName, page) {
+function infoList(url, loginUiElem, hostName) {
     GM_setValue("start", 0);//初始为0，每滚动一次+18
     const isElementLoaded = async (selector, start) => {
         while (document.querySelectorAll(selector)[start] === undefined || document.querySelectorAll(selector)[start].href === undefined) {
@@ -229,9 +229,9 @@ function infoList(url, loginUiElem, hostName, page) {
                         } else {
                             status.textContent = "❌️";
                         }
-                        status.id = "status_" + page + "_" + i;
-                        if (!document.getElementById("status_" + page + "_" + i))
-                            res1[i].parentNode.append(status);
+                        status.id = "status_" + i;
+                        document.getElementById("status_" + i).innerHTML="";
+                        res1[i].parentNode.append(status);
                     });
                 }
             })
@@ -271,7 +271,7 @@ function infoList(url, loginUiElem, hostName, page) {
         if (regexDanbooru.test(path) || regexPixiv.test(path))
             infoUi(div, url, loginUiElem);
         else
-            infoList(url, loginUiElem, window.location.host, window.location.search.split("p=")[1].split("&")[0]);
+            infoList(url, loginUiElem, window.location.host);
     }
     history.pushState = _wr('pushState');
     window.addEventListener('pushState', function () {
@@ -283,7 +283,7 @@ function infoList(url, loginUiElem, hostName, page) {
         if (path == "artworks") {
             infoUi(div, url, loginUiElem);
         } else if (path == "tags") {
-            infoList(url, loginUiElem, window.location.host, window.location.search.split("p=")[1].split("&")[0]);
+            infoList(url, loginUiElem, window.location.host);
         } else {
             div.innerHTML = "";
             div.style.display = "none";
