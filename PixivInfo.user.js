@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      5.6
+// @version      5.7
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -201,13 +201,12 @@ async function searchList(url, href) {
     let id;
     if (window.location.hostname == "www.pixiv.net") {
         id = href.split("/").at(-1);
-        return pixiv(url,id);
+        return pixiv(url, id);
     } else {
 
     }
 }
-function infoList(url, loginUiElem) {
-    let hostName = window.location.host;
+function infoList(url, loginUiElem, hostName, page) {
     GM_setValue("start", 0);//初始为0，每滚动一次+18
     const isElementLoaded = async (selector, start) => {
         while (document.querySelectorAll(selector)[start] === undefined || document.querySelectorAll(selector)[start].href === undefined) {
@@ -223,28 +222,29 @@ function infoList(url, loginUiElem) {
         if (hostName === "www.pixiv.net") {
             isElementLoaded(".sc-57c4d86c-6", GM_getValue("start")).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
-                    if (!document.getElementById("status" + i)) {
-                        let status = document.createElement("div");
-                        searchList(url + "search/", res1[i].href).then(res2 => {
-                            if(res2===0){
-                                status.textContent = "✔️";
-                            }else{
-                                status.textContent = "❌️";
-                            }
-                            status.id = "status" + i;
+                    let status = document.createElement("div");
+                    searchList(url + "search/", res1[i].href).then(res2 => {
+                        if (res2 === 0) {
+                            status.textContent = "✔️";
+                        } else {
+                            status.textContent = "❌️";
+                        }
+                        status.id = "status_" + page + "_" + i;
+                        if (!document.getElementById("status_" + page + "_" + i))
                             res1[i].parentNode.append(status);
-                        });
-                    }
+                    });
                 }
             })
-        }else{
+        } else {
 
         }
-        if (GM_getValue("start") < 60)
-            GM_setValue("start", GM_getValue("start") + 18);
     };
     loginEvent(url, loginUiElem, () => listEvent(url));
-    window.addEventListener("scroll", () => listEvent(url));
+    window.addEventListener("scroll", () => {
+        listEvent(url);
+        if (GM_getValue("start") < 60)
+            GM_setValue("start", GM_getValue("start") + 18);
+    });
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
@@ -265,16 +265,17 @@ function infoList(url, loginUiElem) {
     document.body.prepend(div);
     let regexDanbooru = /posts/g;
     let regexPixiv = /(tags|artworks)/g;
+    let page = window.location.search.split("p=")[1].split("&")[0];
     if (regexDanbooru.test(path) || regexPixiv.test(path)) {
         regexDanbooru = /posts\//g;
         regexPixiv = /artworks/g;
         if (regexDanbooru.test(path) || regexPixiv.test(path))
             infoUi(div, url, loginUiElem);
         else
-            infoList(url, loginUiElem);
+            infoList(url, loginUiElem, window.location.host, page);
     }
     history.pushState = _wr('pushState');
-    window.addEventListener('pushState', function (e) {
+    window.addEventListener('pushState', function () {
         console.warn("href changed to " + window.location.href)
         path = window.location.pathname.split("/")[1];
         let element = document.getElementById('tip');
@@ -283,7 +284,7 @@ function infoList(url, loginUiElem) {
         if (path == "artworks") {
             infoUi(div, url, loginUiElem);
         } else if (path == "tags") {
-            infoList(url, loginUiElem);
+            infoList(url, loginUiElem, window.location.host, page);
         } else {
             div.innerHTML = "";
             div.style.display = "none";
