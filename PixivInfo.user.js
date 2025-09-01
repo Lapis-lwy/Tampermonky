@@ -128,7 +128,7 @@ function infoUi(div, url, loginUiElem) {
             tip.textContent = "⚠️您还未登录！";
             return;
         }
-        search(url + "search/").then((res) => {
+        search(url + "search/").then(res => {
             if (res === 0) {
                 tip.textContent = "✔️本图片尚未下载";
                 tip.style.color = "green";
@@ -193,15 +193,24 @@ function sendReq(url, flag, picId) {
 function pixiv(url, pixivId) {
     return sendReq(url, 0, pixivId);
 }
+function danbooru(url, danbooruId) {
+    return sendReq(url, -1, danbooruId);
+}
 
-async function searchList(url) {
+async function searchList(url, href) {
+    let id;
+    if (window.location.hostname == "www.pixiv.net") {
+        id = href.split("/").at(-1);
+        return pixiv(url,id);
+    } else {
 
+    }
 }
 function infoList(url, loginUiElem) {
     let hostName = window.location.host;
     GM_setValue("start", 0);//初始为0，每滚动一次+18
     const isElementLoaded = async (selector, start) => {
-        while (document.querySelectorAll(selector)[start] === undefined || document.querySelectorAll(selector)[start].src === undefined) {
+        while (document.querySelectorAll(selector)[start] === undefined || document.querySelectorAll(selector)[start].href === undefined) {
             await new Promise(res => requestAnimationFrame(res))
         }
         return await new Promise(res => {
@@ -212,19 +221,24 @@ function infoList(url, loginUiElem) {
         if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
             return;
         if (hostName === "www.pixiv.net") {
-            isElementLoaded(".sc-324476b7-10", GM_getValue("start")).then((res) => {
+            isElementLoaded(".sc-57c4d86c-6", GM_getValue("start")).then(res => {
                 for (let i = 0; i < res.length; i++) {
                     if (!document.getElementById("status" + i)) {
                         let status = document.createElement("div");
-                        searchList(url + "search/").then(() => {
-                            status.textContent = "✔️";
-                            status.style.textAlign = "center";
+                        searchList(url + "search/", res[i].href).then(res => {
+                            if(res===0){
+                                status.textContent = "✔️";
+                            }else{
+                                status.textContent = "❌️";
+                            }
                             status.id = "status" + i;
-                            res[i].parentNode.parentNode.parentNode.prepend(status);
+                            res[i].parentNode.append(status);
                         });
                     }
                 }
             })
+        }else{
+
         }
         if (GM_getValue("start") < 60)
             GM_setValue("start", GM_getValue("start") + 18);
