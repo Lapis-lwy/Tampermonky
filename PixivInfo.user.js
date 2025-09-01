@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      6.0
+// @version      6.1
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -205,15 +205,15 @@ async function searchList(url, href) {
     let id;
     if (window.location.hostname == "www.pixiv.net") {
         id = href.split("/").at(-1);
-        return pixiv(url, id);
+        return await pixiv(url, id);
     } else {
-
+        id = href.split("/").at(-1).split(".")[0];
+        return await danbooru(url, id);
     }
 }
 function infoList(url, loginUiElem, hostName) {
-    GM_setValue("start", 0);//初始为0，每滚动一次+18
-    const isElementLoaded = async (selector, start) => {
-        while (document.querySelectorAll(selector)[start] === undefined || document.querySelectorAll(selector)[start].href === undefined) {
+    const isElementLoaded = async (selector, end) => {
+        while (document.querySelectorAll(selector)[end - 1] === undefined || document.querySelectorAll(selector)[end - 1].href === undefined) {
             await new Promise(res => requestAnimationFrame(res))
         }
         return await new Promise(res => {
@@ -224,7 +224,7 @@ function infoList(url, loginUiElem, hostName) {
         if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
             return;
         if (hostName === "www.pixiv.net") {
-            isElementLoaded(".sc-57c4d86c-6", GM_getValue("start")).then(res1 => {
+            isElementLoaded(".sc-57c4d86c-6", 60).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
@@ -241,6 +241,22 @@ function infoList(url, loginUiElem, hostName) {
                 }
             })
         } else {
+            isElementLoaded(".post-preview-image", 200).then(res1 => {
+                for (let i = 0; i < res1.length; i++) {
+                    if (!document.getElementById("status_" + i)) {
+                        let status = document.createElement("div");
+                        searchList(url + "search/", res1[i].src).then(res2 => {
+                            if (res2 === 0) {
+                                status.textContent = "✔️";
+                            } else {
+                                status.textContent = "❌️";
+                            }
+                            status.id = "status_" + i;
+                            res1[i].append(status);
+                        });
+                    }
+                }
+            });
         }
     };
     loginEvent(url, loginUiElem, () => listEvent(url));
