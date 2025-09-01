@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      5.8
+// @version      5.9
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -176,8 +176,12 @@ function sendReq(url, flag, picId) {
             method: "GET", url: url + "/?query=" + picId, headers: {
                 "x-auth": GM_getValue("auth")
             }, onload: (response) => {
-                let arr = new Set(JSON.parse(response.responseText).map(function (elem) { return elem.path.split("_").at(flag).split(".").at(0).split("/").at(-1) }));
-                console.log(arr);
+                let json = JSON.parse(response.responseText);
+                if (Object.keys(json).length != 0)
+                    json = json.map(function (elem) { return elem.path.split("_").at(flag).split(".").at(0).split("/").at(-1) })
+                else
+                    json = []
+                let arr = new Set(json);
                 let download = 0;
                 for (let elem of arr) {
                     if (elem === picId) {
@@ -230,7 +234,8 @@ function infoList(url, loginUiElem, hostName) {
                             status.textContent = "❌️";
                         }
                         status.id = "status_" + i;
-                        document.getElementById("status_" + i).innerHTML="";
+                        if (document.getElementById("status_" + i))
+                            document.getElementById("status_" + i).innerHTML = "";
                         res1[i].parentNode.append(status);
                     });
                 }
