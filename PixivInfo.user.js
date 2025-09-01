@@ -226,7 +226,7 @@ function infoList(url, loginUiElem, hostName) {
         if (hostName === "www.pixiv.net") {
             isElementLoaded(".sc-57c4d86c-6", GM_getValue("start")).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
-                    if (document.getElementById("status_" + i)) {
+                    if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
                         searchList(url + "search/", res1[i].href).then(res2 => {
                             if (res2 === 0) {
