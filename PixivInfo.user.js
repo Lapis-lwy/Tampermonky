@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      6.4
+// @version      6.5
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -212,9 +212,16 @@ async function searchList(url, href) {
     }
 }
 function infoList(url, loginUiElem, hostName) {
-    const isElementLoaded = async (selector, end) => {
-        while (document.querySelectorAll(selector)[end - 1] === undefined || document.querySelectorAll(selector)[end - 1].href === undefined) {
-            await new Promise(res => requestAnimationFrame(res))
+    const isElementLoaded = async (selector, end, siteNum) => {
+        if (siteNum == 0) {
+            while (document.querySelectorAll(selector)[end - 1] === undefined || document.querySelectorAll(selector)[end - 1].href === undefined) {
+                await new Promise(res => requestAnimationFrame(res))
+            }
+        }
+        else {
+            while (document.querySelectorAll(selector)[end - 1] === undefined || document.querySelectorAll(selector)[end - 1].src === undefined) {
+                await new Promise(res => requestAnimationFrame(res))
+            }
         }
         return await new Promise(res => {
             res(document.querySelectorAll(selector));
@@ -224,7 +231,7 @@ function infoList(url, loginUiElem, hostName) {
         if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
             return;
         if (hostName === "www.pixiv.net") {
-            isElementLoaded(".sc-57c4d86c-6",1).then(res1 => {
+            isElementLoaded(".sc-57c4d86c-6", 1,0).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
@@ -241,7 +248,7 @@ function infoList(url, loginUiElem, hostName) {
                 }
             })
         } else {
-            isElementLoaded(".post-preview-image", 1).then(res1 => {
+            isElementLoaded(".post-preview-image", 1,1).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
