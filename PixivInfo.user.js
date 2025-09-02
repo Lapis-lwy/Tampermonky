@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      6.5
+// @version      6.6
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -259,7 +259,10 @@ function infoList(url, loginUiElem, hostName) {
                                 status.textContent = "❌️";
                             }
                             status.id = "status_" + i;
-                            res1[i].append(status);
+                            status.style.position="absolute";
+                            status.style.top="17.5px";
+                            status.style.backgroundColor="white";
+                            res1[i].parentNode.prepend(status);
                         });
                     }
                 }
