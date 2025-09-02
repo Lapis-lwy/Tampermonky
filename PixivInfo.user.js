@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      6.6
+// @version      6.7
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -10,7 +10,7 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @connect      file.125114.xyz
+// @connect      search.125114.xyz
 // @updateURL    https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // @downloadURL  https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // ==/UserScript==
@@ -284,7 +284,7 @@ function infoList(url, loginUiElem, hostName) {
     GM_setValue("auth", "");
     let div = document.createElement("div");
     let path = window.location.pathname;
-    let url = "https://file.125114.xyz:27567/api/";
+    let url = "https://search.125114.xyz/api/";
     div.style.backgroundColor = "white";
     div.id = "infoDisplay";
     let loginUiElem = loginUi(div);
