@@ -260,8 +260,9 @@ function infoList(url, loginUiElem, hostName) {
                             }
                             status.id = "status_" + i;
                             status.style.position="absolute";
-                            status.style.top="17.5px";
                             status.style.backgroundColor="white";
+                            status.style.fontSize="17.5px";
+                            status.style.right="0";
                             res1[i].parentNode.prepend(status);
                         });
                     }
