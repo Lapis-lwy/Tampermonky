@@ -14,7 +14,7 @@
 // @updateURL    https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // @downloadURL  https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // ==/UserScript==
-//TODO:增加打开图片列表时显示是否在本地有图片
+//TODO:增加识别图集部分图片
 let _wr = function (type) {
     let orig = history[type];
     return function () {
