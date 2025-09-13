@@ -159,9 +159,8 @@ async function search(url) {
         let fullUrl = document.querySelector("#post-info-source").textContent;
         if (fullUrl.split(" ").at(1).split("/").at(0) === "pixiv.net") {//Pixiv来源
             picId = fullUrl.split(" ").at(1).split("/").at(-1).split(" ").at(0);
-            await pixiv(url, picId).then(async res => {
-                if (res === 1) return await new Promise(res => { res(1) });
-            });
+            await pixiv(url, picId);
+            if (GM_getValue("download") === 1) return await new Promise(res => { res(1) });
         }
         if (document.querySelector("#image").src.split("/")[3] === "sample")
             picId = document.querySelector("#image").src.split("-").at(-1).split(".").at(0);
@@ -189,7 +188,8 @@ function sendReq(url, flag, picId) {
                         break;//检查id是否完全相等，有些id是另一个id的一部分
                     }
                 }
-                res(download);
+                GM_setValue("download",download);
+                res();
             }
         })
     })
