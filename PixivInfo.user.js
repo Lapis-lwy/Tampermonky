@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      6.9
+// @version      7.0
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -66,7 +66,7 @@ function loginUi(div) {
 async function login(url) {
     //空字符串
     if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
-        return await new Promise((rej) => rej("-1"));
+        return await new Promise((res,rej) => rej("-1"));
     //登录
     return await new Promise((res, rej) => {
         GM_xmlhttpRequest({
