@@ -231,7 +231,7 @@ function infoList(url, loginUiElem, hostName) {
         if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
             return;
         if (hostName === "www.pixiv.net") {
-            isElementLoaded(".sc-57c4d86c-6", 1,0).then(res1 => {
+            isElementLoaded(".kQuigh", 1,0).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
