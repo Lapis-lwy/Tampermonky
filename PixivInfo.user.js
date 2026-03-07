@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      8.0
+// @version      8.2
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -10,7 +10,7 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @connect      search.125114.xyz:23475
+// @connect      search.125114.xyz
 // @updateURL    https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // @downloadURL  https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // ==/UserScript==
@@ -212,7 +212,11 @@ async function searchList(url, href) {
     }
 }
 function infoList(url, loginUiElem, hostName) {
+    const sleep = (ms)=> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+};
     const isElementLoaded = async (selector, end, siteNum) => {
+        await sleep(2000)
         if (siteNum == 0) {
             while (document.querySelectorAll(selector)[end - 1] === undefined || document.querySelectorAll(selector)[end - 1].href === undefined) {
                 await new Promise(res => requestAnimationFrame(res))
