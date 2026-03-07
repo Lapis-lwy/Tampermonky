@@ -10,7 +10,7 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @connect      search.125114.xyz
+// @connect      search.125114.xyz:23475
 // @updateURL    https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // @downloadURL  https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // ==/UserScript==
@@ -284,7 +284,7 @@ function infoList(url, loginUiElem, hostName) {
     GM_setValue("auth", "");
     let div = document.createElement("div");
     let path = window.location.pathname;
-    let url = "https://search.125114.xyz/api/";
+    let url = "https://search.125114.xyz:23475/api/";
     div.style.backgroundColor = "white";
     div.id = "infoDisplay";
     let loginUiElem = loginUi(div);
