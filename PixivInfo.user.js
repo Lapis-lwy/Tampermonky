@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      8.2
+// @version      8.3
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -235,7 +235,7 @@ function infoList(url, loginUiElem, hostName) {
         if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
             return;
         if (hostName === "www.pixiv.net") {
-            isElementLoaded("ul>li>div>div:nth-of-type(2)>a", 1,0).then(res1 => {
+            isElementLoaded("div[class='col-span-2']>div>div:nth-of-type(2)>a", 1,0).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
@@ -306,7 +306,6 @@ function infoList(url, loginUiElem, hostName) {
     history.pushState = _wr('pushState');
     window.addEventListener('pushState', function () {
         console.warn("href changed to " + window.location.href)
-        path = window.location.pathname.split("/")[1];
         let element = document.getElementById('tip');
         if (element)
             element.remove();
