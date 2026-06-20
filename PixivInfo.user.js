@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      9.7
+// @version      9.8
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -174,11 +174,12 @@ async function search(url) {
     return await sendReq(url, flag, picId);
 }
 function sendReq(url, flag, picId) {
-    return new Promise(res => {
+    return new Promise((res, rej) => {
         GM_xmlhttpRequest({
             method: "GET", url: url + "?query=" + picId + "&sources=Image",
             anonymous: true,
             cookie: "filebrowser_quantum_jwt=" + GM_getValue("auth"),
+            timeout: 20000,
             onload: (response) => {
                 let json = JSON.parse(response.responseText);
                 if (Object.keys(json).length != 0)
@@ -195,6 +196,14 @@ function sendReq(url, flag, picId) {
                 }
                 GM_setValue("download", download);
                 res();
+            },
+            onerror: (error) => {
+                console.error('❌id:' + picId + ' 请求失败', error);
+                rej(error)
+            },
+            ontimeout: () => {
+                console.warn('⏰id:' + picId + '请求超时');
+                reject(new Error("请求超时"));
             }
         })
     })
