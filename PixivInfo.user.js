@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      9.3
+// @version      9.4
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -73,7 +73,7 @@ async function login(url) {
             method: "POST",
             url: url + "auth/login?username=" + GM_getValue("username"),
             headers: {
-                "X-Password":GM_getValue("password")
+                "X-Password": GM_getValue("password")
             },
             onload: (response) => {
                 if (response.status === 200) {
@@ -101,7 +101,7 @@ function loginRes(login, loginUiElem) {
             alert("服务器异常，请稍后重试！");
             return;
         }
-        if (rej === 403||rej === 401) {
+        if (rej === 403 || rej === 401) {
             alert("用户名或密码错误！");
             loginUiElem.loginElem.style.display = "block";
             GM_setValue("username", "");
@@ -120,7 +120,6 @@ function loginEvent(url, loginUiElem, event) {
     return loginRes(login(url), loginUiElem).finally(event);
 }
 function infoUi(div, url, loginUiElem) {
-    GM_setValue("auth", "");
     let tip = document.createElement("h2");
     tip.style.textAlign = "center";
     tip.style.margin = "0px";
@@ -176,9 +175,9 @@ async function search(url) {
 function sendReq(url, flag, picId) {
     return new Promise(res => {
         GM_xmlhttpRequest({
-            method: "GET", url: url + "?query=" + picId+"&sources=Image",
+            method: "GET", url: url + "?query=" + picId + "&sources=Image",
             anonymous: true,
-            cookie: "filebrowser_quantum_jwt="+GM_getValue("auth"),
+            cookie: "filebrowser_quantum_jwt=" + GM_getValue("auth"),
             onload: (response) => {
                 let json = JSON.parse(response.responseText);
                 if (Object.keys(json).length != 0)
@@ -285,7 +284,7 @@ function infoList(url, loginUiElem, hostName) {
             alert("输入框为空！");
             return;
         }
-        loginEvent(url, loginUiElem, () => { listEvent() });
+        loginEvent(url, loginUiElem, () => { listEvent(url) });
     };
 }
 (function () {
@@ -311,16 +310,16 @@ function infoList(url, loginUiElem, hostName) {
     history.pushState = _wr('pushState');
     window.addEventListener('pushState', function () {
         console.warn("href changed to " + window.location.href)
-        let element = document.getElementById('tip');
-        if (element)
-            element.remove();
-        if (path == "artworks") {
-            infoUi(div, url, loginUiElem);
-        } else if (path == "tags") {
-            infoList(url, loginUiElem, window.location.host);
-        } else {
-            div.innerHTML = "";
-            div.style.display = "none";
+        let path = window.location.pathname
+        let regexDanbooru = /posts/g;
+        let regexPixiv = /(tags|artworks)/g;
+        if (regexDanbooru.test(path) || regexPixiv.test(path)) {
+            regexDanbooru = /posts\//g;
+            regexPixiv = /artworks/g;
+            if (regexDanbooru.test(path) || regexPixiv.test(path))
+                infoUi(div, url, loginUiElem);
+            else
+                infoList(url, loginUiElem, window.location.host);
         }
     }
     )
