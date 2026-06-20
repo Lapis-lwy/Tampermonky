@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      8.3
+// @version      9.0
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -10,7 +10,7 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
-// @connect      search.125114.xyz
+// @connect      file.125114.xyz
 // @updateURL    https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // @downloadURL  https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // ==/UserScript==
@@ -66,11 +66,13 @@ function loginUi(div) {
 async function login(url) {
     //空字符串
     if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
-        return await new Promise((res,rej) => rej("-1"));
+        return await new Promise((res, rej) => rej("-1"));
     //登录
     return await new Promise((res, rej) => {
         GM_xmlhttpRequest({
-            method: "POST", url: url + "login", data: '{"username":"' + GM_getValue("username") + '","password":"' + GM_getValue("password") + '","recaptcha":""}',
+            method: "POST",
+            url: url + "auth/login?username=" + GM_getValue("username"),
+            headers: '{"X-Password":"' + GM_getValue("password") + '"}',
             onload: (response) => {
                 if (response.responseText.trim() === "403 Forbidden" || response.status == "502") {
                     rej(response.status);
@@ -128,7 +130,7 @@ function infoUi(div, url, loginUiElem) {
             tip.textContent = "⚠️您还未登录！";
             return;
         }
-        search(url + "search/").then(() => {
+        search(url + "tools/search").then(() => {
             if (GM_getValue("download") === 0) {
                 tip.textContent = "✔️本图片尚未下载";
                 tip.style.color = "green";
@@ -172,9 +174,10 @@ async function search(url) {
 function sendReq(url, flag, picId) {
     return new Promise(res => {
         GM_xmlhttpRequest({
-            method: "GET", url: url + "/?query=" + picId, headers: {
-                "x-auth": GM_getValue("auth")
-            }, onload: (response) => {
+            method: "GET", url: url + "?query=" + picId+"&sources=Image",
+            anonymous: true,
+            cookie: "filebrowser_quantum_jwt="+GM_getValue("auth"),
+            onload: (response) => {
                 let json = JSON.parse(response.responseText);
                 if (Object.keys(json).length != 0)
                     json = json.map(function (elem) { return elem.path.split("_").at(flag).split(".").at(0).split("/").at(-1) })
@@ -188,7 +191,7 @@ function sendReq(url, flag, picId) {
                         break;//检查id是否完全相等，有些id是另一个id的一部分
                     }
                 }
-                GM_setValue("download",download);
+                GM_setValue("download", download);
                 res();
             }
         })
@@ -212,9 +215,9 @@ async function searchList(url, href) {
     }
 }
 function infoList(url, loginUiElem, hostName) {
-    const sleep = (ms)=> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-};
+    const sleep = (ms) => {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    };
     const isElementLoaded = async (selector, end, siteNum) => {
         await sleep(2000)
         if (siteNum == 0) {
@@ -235,7 +238,7 @@ function infoList(url, loginUiElem, hostName) {
         if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
             return;
         if (hostName === "www.pixiv.net") {
-            isElementLoaded("div[class='col-span-2']>div>div:nth-of-type(2)>a", 1,0).then(res1 => {
+            isElementLoaded("div[class='col-span-2']>div>div:nth-of-type(2)>a", 1, 0).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
@@ -252,7 +255,7 @@ function infoList(url, loginUiElem, hostName) {
                 }
             })
         } else {
-            isElementLoaded(".post-preview-image", 1,1).then(res1 => {
+            isElementLoaded(".post-preview-image", 1, 1).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
@@ -263,10 +266,10 @@ function infoList(url, loginUiElem, hostName) {
                                 status.textContent = "❌️";
                             }
                             status.id = "status_" + i;
-                            status.style.position="absolute";
-                            status.style.backgroundColor="white";
-                            status.style.fontSize="17.5px";
-                            status.style.right="0";
+                            status.style.position = "absolute";
+                            status.style.backgroundColor = "white";
+                            status.style.fontSize = "17.5px";
+                            status.style.right = "0";
                             res1[i].parentNode.prepend(status);
                         });
                     }
@@ -288,7 +291,7 @@ function infoList(url, loginUiElem, hostName) {
     GM_setValue("auth", "");
     let div = document.createElement("div");
     let path = window.location.pathname;
-    let url = "https://search.125114.xyz:23475/api/";
+    let url = "https://file.125114.xyz:23475/api/";
     div.style.backgroundColor = "white";
     div.id = "infoDisplay";
     let loginUiElem = loginUi(div);
