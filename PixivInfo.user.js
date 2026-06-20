@@ -298,12 +298,12 @@ function infoList(url, loginUiElem, hostName) {
     div.id = "infoDisplay";
     let loginUiElem = loginUi(div);
     document.body.prepend(div);
-    let regexDanbooru = /posts/g;
-    let regexPixiv = /(tags|artworks)/g;
+    let regexDanbooru = /posts/;
+    let regexPixiv = /(tags|artworks)/;
     let tip = null
     if (regexDanbooru.test(path) || regexPixiv.test(path)) {
-        regexDanbooru = /posts\//g;
-        regexPixiv = /artworks/g;
+        regexDanbooru = /posts\//;
+        regexPixiv = /artworks/;
         if (regexDanbooru.test(path) || regexPixiv.test(path))
             tip = infoUi(div, url, loginUiElem);
         else
@@ -317,11 +317,11 @@ function infoList(url, loginUiElem, hostName) {
             tip = null
         }
         let path = window.location.pathname
-        let regexDanbooru = /posts/g;
-        let regexPixiv = /(tags|artworks)/g;
+        let regexDanbooru = /posts/;
+        let regexPixiv = /(tags|artworks)/;
         if (regexDanbooru.test(path) || regexPixiv.test(path)) {
-            regexDanbooru = /posts\//g;
-            regexPixiv = /artworks/g;
+            regexDanbooru = /posts\//;
+            regexPixiv = /artworks/;
             if (regexDanbooru.test(path) || regexPixiv.test(path))
                 tip = infoUi(div, url, loginUiElem);
             else
