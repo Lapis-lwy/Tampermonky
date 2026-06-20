@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      9.0
+// @version      9.1
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -72,13 +72,15 @@ async function login(url) {
         GM_xmlhttpRequest({
             method: "POST",
             url: url + "auth/login?username=" + GM_getValue("username"),
-            headers: '{"X-Password":"' + GM_getValue("password") + '"}',
+            headers: {
+                "X-Password":GM_getValue("password")
+            },
             onload: (response) => {
-                if (response.responseText.trim() === "403 Forbidden" || response.status == "502") {
-                    rej(response.status);
-                } else {
+                if (response.status === 200) {
                     GM_setValue("auth", response.responseText);
                     res();
+                } else {
+                    rej(response.status);
                 }
             }
         });
@@ -95,11 +97,11 @@ function loginRes(login, loginUiElem) {
         loginUiElem.loginElem.append(suc);
         loginUiElem.loginElem.style.display = "block";
     }, (rej) => {
-        if (rej == "502") {
+        if (rej === 502) {
             alert("服务器异常，请稍后重试！");
             return;
         }
-        if (rej == "403") {
+        if (rej === 403||rej === 401) {
             alert("用户名或密码错误！");
             loginUiElem.loginElem.style.display = "block";
             GM_setValue("username", "");
