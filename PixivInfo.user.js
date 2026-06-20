@@ -244,7 +244,7 @@ function infoList(url, loginUiElem, hostName) {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
-                        searchList(url + "tools/search/", res1[i].href).then(() => {
+                        searchList(url + "tools/search", res1[i].href).then(() => {
                             if (GM_getValue("download") === 0) {
                                 status.textContent = "✔️";
                             } else {
@@ -261,7 +261,7 @@ function infoList(url, loginUiElem, hostName) {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
-                        searchList(url + "tools/search/", res1[i].src).then(res2 => {
+                        searchList(url + "tools/search", res1[i].src).then(res2 => {
                             if (GM_getValue("download") === 0) {
                                 status.textContent = "✔️";
                             } else {
