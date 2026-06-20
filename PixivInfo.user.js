@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      9.1
+// @version      9.2
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -244,7 +244,7 @@ function infoList(url, loginUiElem, hostName) {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
-                        searchList(url + "search/", res1[i].href).then(() => {
+                        searchList(url + "tools/search/", res1[i].href).then(() => {
                             if (GM_getValue("download") === 0) {
                                 status.textContent = "✔️";
                             } else {
@@ -261,7 +261,7 @@ function infoList(url, loginUiElem, hostName) {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
-                        searchList(url + "search/", res1[i].src).then(res2 => {
+                        searchList(url + "tools/search/", res1[i].src).then(res2 => {
                             if (GM_getValue("download") === 0) {
                                 status.textContent = "✔️";
                             } else {
