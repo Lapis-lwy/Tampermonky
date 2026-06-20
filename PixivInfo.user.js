@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      9.5
+// @version      9.6
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -300,19 +300,22 @@ function infoList(url, loginUiElem, hostName) {
     document.body.prepend(div);
     let regexDanbooru = /posts/g;
     let regexPixiv = /(tags|artworks)/g;
-    let tip
+    let tip = null
     if (regexDanbooru.test(path) || regexPixiv.test(path)) {
         regexDanbooru = /posts\//g;
         regexPixiv = /artworks/g;
         if (regexDanbooru.test(path) || regexPixiv.test(path))
-            tip=infoUi(div, url, loginUiElem);
+            tip = infoUi(div, url, loginUiElem);
         else
             infoList(url, loginUiElem, window.location.host);
     }
     history.pushState = _wr('pushState');
     window.addEventListener('pushState', function () {
         console.warn("href changed to " + window.location.href)
-        tip.remove()
+        if (tip != null) {
+            tip.remove()
+            tip = null
+        }
         let path = window.location.pathname
         let regexDanbooru = /posts/g;
         let regexPixiv = /(tags|artworks)/g;
@@ -320,7 +323,7 @@ function infoList(url, loginUiElem, hostName) {
             regexDanbooru = /posts\//g;
             regexPixiv = /artworks/g;
             if (regexDanbooru.test(path) || regexPixiv.test(path))
-                tip=infoUi(div, url, loginUiElem);
+                tip = infoUi(div, url, loginUiElem);
             else
                 infoList(url, loginUiElem, window.location.host);
         }
