@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      9.8
+// @version      9.9
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -15,7 +15,11 @@
 // @downloadURL  https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // ==/UserScript==
 //TODO:增加识别图集部分图片
-//TODO:增加请求缓存
+/////////////////////////////////////////请求缓存////////////////////////////////////////////////////////////
+
+
+
+
 let _wr = function (type) {
     let orig = history[type];
     return function () {
@@ -107,6 +111,7 @@ function loginRes(login, loginUiElem) {
             loginUiElem.loginElem.style.display = "block";
             GM_setValue("username", "");
             GM_setValue("password", "");
+            GM_setValue("auth", "");
         }
         if (rej == "-1") {
             loginUiElem.loginElem.style.display = "block";
@@ -118,7 +123,10 @@ function loginEvent(url, loginUiElem, event) {
         GM_setValue("username", loginUiElem.userElem.value);
         GM_setValue("password", loginUiElem.passwordElem.value);
     }
-    return loginRes(login(url), loginUiElem).finally(event);
+    return loginRes(login(url), loginUiElem).finally(() => {
+        if(typeof event==='function')
+            event()
+    });
 }
 function infoUi(div, url, loginUiElem) {
     let tip = document.createElement("h2");
@@ -162,9 +170,9 @@ async function search(url) {
     } else {
         let fullUrl = document.querySelector("#post-info-source").textContent;
         if (fullUrl.split(" ").at(1).split("/").at(0) === "pixiv.net") {//Pixiv来源
-            picId = fullUrl.split(" ").at(1).split("/").at(-1).split(" ").at(0);
+            picId = fullUrl.split(" ").at(1).split("/").at(-1).split(" ").at(0);
             await pixiv(url, picId);
-            if (GM_getValue("download") === 1) return await new Promise(res => { res(1) });
+            return await new Promise(res => { res(GM_getValue("download")) });
         }
         if (document.querySelector("#image").src.split("/")[3] === "sample")
             picId = document.querySelector("#image").src.split("-").at(-1).split(".").at(0);
@@ -203,7 +211,7 @@ function sendReq(url, flag, picId) {
             },
             ontimeout: () => {
                 console.warn('⏰id:' + picId + '请求超时');
-                reject(new Error("请求超时"));
+                rej(new Error("请求超时"));
             }
         })
     })
@@ -276,6 +284,9 @@ function infoList(url, loginUiElem, hostName) {
                             } else {
                                 status.textContent = "❌️";
                             }
+                            let elem = document.getElementById("status_" + i)
+                            if (elem)
+                                elem.remove()
                             status.id = "status_" + i;
                             status.style.position = "absolute";
                             status.style.backgroundColor = "white";
