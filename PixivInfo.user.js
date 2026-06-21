@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      9.11
+// @version      10.0
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -16,9 +16,75 @@
 // ==/UserScript==
 //TODO:增加识别图集部分图片
 /////////////////////////////////////////请求缓存////////////////////////////////////////////////////////////
+const CACHE_KEY = "pixivInfoCache";
+const MAX_CACHE_SIZE = 2000;
+//不设过期时间，缓存满了之后从列表最前面删除
+/*缓存：
+            id:(download:0 or 1)
+*/
+class Cache {
+    constructor(data=[],index={}) {
+        this.data = data
+        this.index = index
+    }
+    //插入尾部
+    push(id, isDownload) {
+        if (!id || isDownload===undefined||isDownload===null) return false
+        if (this.index.hasOwnProperty(id)){
+            this.index[id] = isDownload;
+            return true
+        }
+        if (this.data.length >= MAX_CACHE_SIZE) {
+            const oldId = this.data.shift();
+            if (oldId) {
+                delete this.index[oldId];
+            }
+        }
+        this.data.push(id)
+        this.index[id] = isDownload
+        return true
+    }
+    //删除头部
+    pop() {
+        if (this.data.length === 0) return undefined;
+        const id = this.data.shift()
+        if (id) {
+            delete this.index[id]
+        }
+        return id
+    }
+    //根据id查找
+    findById(id) {
+        return this.index[id]
+    }
+    //转为json字符串
+    toJSON() {
+        return JSON.stringify({ "data": this.data, "index": this.index })
+    }
+    //json字符串转Cache
+    static fromJSON(json) {
+        const res = JSON.parse(json)
+        const cache = new Cache(res["data"], res["index"])
+        return cache
+    }
+}
 
+function getCache() {
+    try {
+        return Cache.fromJSON(GM_getValue(CACHE_KEY, "{}"))
+    } catch (e) {
+        return new Cache();
+    }
+}
+function setCache(cache) {
+    try {
+        GM_setValue(CACHE_KEY, cache.toJSON());
+    } catch (e) {
+        console.warn("缓存保存失败", e);
+    }
+}
 
-
+///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 let _wr = function (type) {
     let orig = history[type];
@@ -127,7 +193,7 @@ function loginEvent(url, loginUiElem, event) {
         GM_setValue("password", loginUiElem.passwordElem.value);
     }
     return loginRes(login(url), loginUiElem).finally(() => {
-        if(typeof event==='function')
+        if (typeof event === 'function')
             event()
     });
 }
@@ -174,7 +240,9 @@ async function search(url) {
         let fullUrl = document.querySelector("#post-info-source").textContent;
         if (fullUrl.split(" ").at(1).split("/").at(0) === "pixiv.net") {//Pixiv来源
             picId = fullUrl.split(" ").at(1).split("/").at(-1).split(" ").at(0);
-            return await pixiv(url, picId);
+            await pixiv(url, picId);
+            if (GM_getValue("download") === 1)
+                return await new Promise((res) => { res(1) });
         }
         if (document.querySelector("#image").src.split("/")[3] === "sample")
             picId = document.querySelector("#image").src.split("-").at(-1).split(".").at(0);
@@ -205,7 +273,7 @@ function sendReq(url, flag, picId) {
                     }
                 }
                 GM_setValue("download", download);
-                res();
+                res(download);
             },
             onerror: (error) => {
                 console.error('❌id:' + picId + ' 请求失败', error);
