@@ -101,6 +101,9 @@ function loginRes(login, loginUiElem) {
         suc.style.color = "green";
         loginUiElem.loginElem.append(suc);
         loginUiElem.loginElem.style.display = "block";
+        setTimeout(() => {
+            loginUiElem.loginElem.style.display = "none";
+        }, 3000);
     }, (rej) => {
         if (rej === 502) {
             alert("服务器异常，请稍后重试！");
