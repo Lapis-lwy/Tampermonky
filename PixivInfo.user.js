@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      9.9
+// @version      9.10
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -175,7 +175,7 @@ async function search(url) {
         if (fullUrl.split(" ").at(1).split("/").at(0) === "pixiv.net") {//Pixiv来源
             picId = fullUrl.split(" ").at(1).split("/").at(-1).split(" ").at(0);
             await pixiv(url, picId);
-            return await new Promise(res => { res(GM_getValue("download")) });
+            return Promise.resolve(GM_getValue("download"));
         }
         if (document.querySelector("#image").src.split("/")[3] === "sample")
             picId = document.querySelector("#image").src.split("-").at(-1).split(".").at(0);
