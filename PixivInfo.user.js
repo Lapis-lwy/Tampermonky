@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      11.4
+// @version      12.0
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -28,41 +28,258 @@ let _wr = function (type) {
 };
 let noneArr = [undefined, ""];
 function loginUi(div) {
+    // 检查登录状态
+    function isLoggedIn() {
+        if (typeof GM_getValue !== 'function') return false;
+        const u = GM_getValue("username"), p = GM_getValue("password");
+        return u && u.trim() && p && p.trim();
+    }
+
+    // 显示通知
+    function notify(msg, type = "info") {
+        const colors = { success: "#4CAF50", error: "#f44336", warning: "#ff9800", info: "#2196F3" };
+        const el = document.createElement("div");
+        el.textContent = msg;
+        el.style.cssText = `
+            position: fixed; bottom: 20px; right: 20px; padding: 10px 20px;
+            background: ${colors[type] || colors.info}; color: white;
+            border-radius: 4px; font-size: 14px; z-index: 10000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            animation: slideIn 0.3s ease;
+        `;
+        document.body.appendChild(el);
+        setTimeout(() => {
+            el.style.opacity = "0";
+            el.style.transition = "opacity 0.3s";
+            setTimeout(() => el.remove(), 300);
+        }, 3000);
+    }
+
+    // 创建主容器
     let log = document.createElement("div");
     log.id = "login";
-    let userTip = document.createElement("lable");
+
+    // 创建登录按钮（左下角）
+    let loginBtn = document.createElement("button");
+    loginBtn.innerHTML = "🔑 登录";
+    loginBtn.style.cssText = `
+        position: fixed; bottom: 20px; left: 20px;
+        padding: 10px 20px;
+        background: #2196F3;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+        font-size: 14px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 9998;
+        transition: all 0.3s ease;
+    `;
+    loginBtn.onmouseover = () => {
+        if (loginBtn.style.background !== "#4CAF50") {
+            loginBtn.style.background = "#1976D2";
+        }
+    };
+    loginBtn.onmouseout = () => {
+        if (loginBtn.style.background !== "#4CAF50") {
+            loginBtn.style.background = "#2196F3";
+        }
+    };
+
+    // 创建登录弹窗
+    let loginBox = document.createElement("div");
+    loginBox.style.cssText = `
+        position: fixed; bottom: 80px; left: 20px;
+        background: rgba(255,255,255,0.98);
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 9999;
+        display: none;
+        min-width: 250px;
+        backdrop-filter: blur(10px);
+    `;
+
+    // 弹窗标题和关闭按钮
+    let titleBar = document.createElement("div");
+    titleBar.style.cssText = "display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;";
+
+    let title = document.createElement("span");
+    title.textContent = "用户登录";
+    title.style.cssText = "font-size: 16px; font-weight: bold; color: #333;";
+    titleBar.appendChild(title);
+
+    let closeBox = document.createElement("span");
+    closeBox.textContent = "×";
+    closeBox.style.cssText = "cursor: pointer; color: #999; font-size: 20px; line-height: 1;";
+    closeBox.onclick = () => loginBox.style.display = "none";
+    titleBar.appendChild(closeBox);
+    loginBox.appendChild(titleBar);
+
+    // 用户名
+    let userTip = document.createElement("label");
     userTip.textContent = "用户名：";
-    userTip.style.fontSize = "16px";
-    log.append(userTip);
+    userTip.style.cssText = "font-size: 14px; color: #333; display: block; margin-bottom: 5px;";
+    loginBox.appendChild(userTip);
+
     let user = document.createElement("input");
     user.type = "text";
     user.id = "username";
     user.placeholder = "请输入用户名";
+    user.style.cssText = `
+        width: 100%; padding: 8px 10px;
+        border: 1px solid #ddd; border-radius: 4px;
+        font-size: 14px; margin-bottom: 12px;
+        box-sizing: border-box;
+    `;
     userTip.htmlFor = "username";
-    log.append(user);
-    let space = document.createElement("lable");
-    space.style.fontSize = "16px";
-    space.textContent = "  ";
-    log.append(space);
-    let passTip = document.createElement("lable");
-    passTip.style.fontSize = "16px";
+    loginBox.appendChild(user);
+
+    // 密码
+    let passTip = document.createElement("label");
     passTip.textContent = "密码：";
-    log.append(passTip);
+    passTip.style.cssText = "font-size: 14px; color: #333; display: block; margin-bottom: 5px;";
+    loginBox.appendChild(passTip);
+
     let passwd = document.createElement("input");
     passwd.type = "password";
     passwd.id = "password";
     passwd.placeholder = "请输入密码";
+    passwd.style.cssText = `
+        width: 100%; padding: 8px 10px;
+        border: 1px solid #ddd; border-radius: 4px;
+        font-size: 14px; margin-bottom: 15px;
+        box-sizing: border-box;
+    `;
     passTip.htmlFor = "password";
-    log.append(passwd);
-    log.style.display = "none";
+    loginBox.appendChild(passwd);
+
+    // 按钮组
+    let btnGroup = document.createElement("div");
+    btnGroup.style.cssText = "display: flex; gap: 10px;";
+
     let btn = document.createElement("button");
     btn.innerHTML = "登录";
-    log.append(btn);
-    if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password"))) {
-        log.style.display = "block";
+    btn.style.cssText = `
+        flex: 1; padding: 8px;
+        background: #2196F3; color: white;
+        border: none; border-radius: 4px;
+        cursor: pointer; font-size: 14px;
+    `;
+    btn.onmouseover = () => {
+        if (btn.style.background !== "#4CAF50") {
+            btn.style.background = "#1976D2";
+        }
+    };
+    btn.onmouseout = () => {
+        if (btn.style.background !== "#4CAF50") {
+            btn.style.background = "#2196F3";
+        }
+    };
+
+    let cancelBtn = document.createElement("button");
+    cancelBtn.innerHTML = "取消";
+    cancelBtn.style.cssText = `
+        flex: 1; padding: 8px;
+        background: #f44336; color: white;
+        border: none; border-radius: 4px;
+        cursor: pointer; font-size: 14px;
+    `;
+    cancelBtn.onmouseover = () => cancelBtn.style.background = "#da190b";
+    cancelBtn.onmouseout = () => cancelBtn.style.background = "#f44336";
+    cancelBtn.onclick = () => loginBox.style.display = "none";
+
+    btnGroup.appendChild(btn);
+    btnGroup.appendChild(cancelBtn);
+    loginBox.appendChild(btnGroup);
+
+    // 登录逻辑
+    function handleLogin() {
+        const username = user.value.trim();
+        const password = passwd.value.trim();
+        if (!username || !password) {
+            notify("请输入用户名和密码", "warning");
+            return;
+        }
     }
-    div.append(log);
-    return { userElem: user, passwordElem: passwd, buttonElem: btn, loginElem: log }
+
+    function handleLogout() {
+        GM_setValue("username", "");
+        GM_setValue("password", "");
+
+        // 恢复蓝色
+        loginBtn.innerHTML = "🔑 登录";
+        loginBtn.style.background = "#2196F3";
+        loginBtn.onmouseover = () => loginBtn.style.background = "#1976D2";
+        loginBtn.onmouseout = () => loginBtn.style.background = "#2196F3";
+
+        user.value = "";
+        passwd.value = "";
+        notify("已登出", "info");
+    }
+
+    // 点击登录按钮切换弹窗
+    loginBtn.onclick = () => {
+        if (isLoggedIn()) {
+            // 已登录则执行登出
+            if (confirm("确认登出吗？")) {
+                handleLogout();
+            }
+        } else {
+            // 未登录则显示登录框
+            loginBox.style.display = loginBox.style.display === "none" ? "block" : "none";
+            if (loginBox.style.display === "block") {
+                user.focus();
+            }
+        }
+    };
+
+    btn.onclick = handleLogin;
+
+    // 回车键支持
+    passwd.onkeypress = (e) => { if (e.key === "Enter") handleLogin(); };
+    user.onkeypress = (e) => { if (e.key === "Enter") passwd.focus(); };
+
+    // 点击其他地方关闭登录框
+    document.addEventListener("click", (e) => {
+        if (loginBox.style.display === "block" &&
+            !loginBox.contains(e.target) &&
+            e.target !== loginBtn) {
+            loginBox.style.display = "none";
+        }
+    });
+
+    // 初始状态
+    if (isLoggedIn()) {
+        loginBtn.innerHTML = "✅ 已登录";
+        loginBtn.style.background = "#4CAF50";
+        loginBtn.onmouseover = () => loginBtn.style.background = "#45a049";
+        loginBtn.onmouseout = () => loginBtn.style.background = "#4CAF50";
+    }
+
+    log.appendChild(loginBtn);
+    log.appendChild(loginBox);
+    div.appendChild(log);
+
+    // 保持原返回值不变
+    return { userElem: user, passwordElem: passwd, buttonElem: btn, loginElem: log, loginBtn: loginBtn, loginBox: loginBox }
+}
+
+// 添加动画样式（一次性）
+if (!document.getElementById("login-style")) {
+    const style = document.createElement('style');
+    style.id = "login-style";
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        #login > div:last-child {
+            animation: slideIn 0.3s ease;
+        }
+    `;
+    document.head.appendChild(style);
 }
 async function login(url) {
     //空字符串
@@ -89,17 +306,15 @@ async function login(url) {
 }
 function loginRes(login, loginUiElem) {
     return login.then(() => {
-        loginUiElem.loginElem.innerHTML = "";
-        let suc = document.createElement("h3");
-        suc.textContent = "登录成功！";
-        suc.style.margin = "0px";
-        suc.style.padding = "12px";
-        suc.style.color = "green";
-        loginUiElem.loginElem.append(suc);
-        loginUiElem.loginElem.style.display = "block";
-        setTimeout(() => {
-            loginUiElem.loginElem.style.display = "none";
-        }, 3000);
+        // 按钮变绿色
+        loginUiElem.loginBtn.innerHTML = "✅ 已登录";
+        loginUiElem.loginBtn.style.background = "#4CAF50";
+        loginUiElem.loginBtn.onmouseover = () => loginUiElem.loginBtn.style.background = "#45a049";
+        loginUiElem.loginBtn.onmouseout = () => loginUiElem.loginBtn.style.background = "#4CAF50";
+
+        loginUiElem.loginBox.style.display = "none";
+
+        notify("✅ 登录成功！", "success");
     }, (rej) => {
         if (rej === 502) {
             alert("服务器异常，请稍后重试！");
