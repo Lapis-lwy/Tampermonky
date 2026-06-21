@@ -94,7 +94,7 @@ class Cache {
         }
     }
 }
-const cache = (new Cache()).loadFromStorage();
+let cache = new Cache().loadFromStorage();
 console.log(`📦 缓存已加载: ${cache.data.length} 条数据`);
 
 function getCache() {
