@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      10.0
+// @version      11.0
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -23,14 +23,14 @@ const MAX_CACHE_SIZE = 2000;
             id:(download:0 or 1)
 */
 class Cache {
-    constructor(data=[],index={}) {
+    constructor(data = [], index = {}) {
         this.data = data
         this.index = index
     }
     //插入尾部
     push(id, isDownload) {
-        if (!id || isDownload===undefined||isDownload===null) return false
-        if (this.index.hasOwnProperty(id)){
+        if (!id || isDownload === undefined || isDownload === null) return false
+        if (this.index.hasOwnProperty(id)) {
             this.index[id] = isDownload;
             return true
         }
@@ -62,28 +62,46 @@ class Cache {
         return JSON.stringify({ "data": this.data, "index": this.index })
     }
     //json字符串转Cache
-    static fromJSON(json) {
-        const res = JSON.parse(json)
-        const cache = new Cache(res["data"], res["index"])
-        return cache
+    fromJSON(json) {
+        try {
+            const res = JSON.parse(json)
+            this.data = res["data"]
+            this.index = res["index"]
+        } catch (e) {
+            console.warn('解析缓存失败', e);
+            this.data = [];
+            this.index = {};
+        }
+        return this
+    }
+    loadFromStorage() {
+        try {
+            const raw = GM_getValue(CACHE_KEY, "{}");
+            return this.fromJSON(raw);
+        } catch (e) {
+            console.warn("读取缓存失败", e);
+            this.data = [];
+            this.index = {};
+            return this;
+        }
+    }
+    save() {
+        try {
+            GM_setValue(CACHE_KEY, this.toJSON());
+        } catch (e) {
+            console.warn("缓存保存失败", e);
+        }
     }
 }
+const cache = new Cache().loadFromStorage();
+console.log(`📦 缓存已加载: ${cache.data.length} 条数据`);
 
 function getCache() {
-    try {
-        return Cache.fromJSON(GM_getValue(CACHE_KEY, "{}"))
-    } catch (e) {
-        return new Cache();
-    }
+    return cache
 }
-function setCache(cache) {
-    try {
-        GM_setValue(CACHE_KEY, cache.toJSON());
-    } catch (e) {
-        console.warn("缓存保存失败", e);
-    }
+function setCache(cacheInstance) {
+    cacheInstance.save();
 }
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 let _wr = function (type) {
@@ -252,6 +270,10 @@ async function search(url) {
     return await sendReq(url, flag, picId);
 }
 function sendReq(url, flag, picId) {
+    if (cache.findById(picId) != undefined) {
+        GM_setValue("download", cache.findById(picId));
+        return new Promise((res) => { res(1) })
+    }
     return new Promise((res, rej) => {
         GM_xmlhttpRequest({
             method: "GET", url: url + "?query=" + picId + "&sources=Image",
@@ -273,6 +295,7 @@ function sendReq(url, flag, picId) {
                     }
                 }
                 GM_setValue("download", download);
+                cache.push(picId, download)
                 res(download);
             },
             onerror: (error) => {
@@ -399,6 +422,7 @@ function infoList(url, loginUiElem, hostName) {
         else
             infoList(url, loginUiElem, window.location.host);
     }
+    setCache(cache)
     history.pushState = _wr('pushState');
     window.addEventListener('pushState', function () {
         console.warn("href changed to " + window.location.href)
@@ -417,6 +441,7 @@ function infoList(url, loginUiElem, hostName) {
             else
                 infoList(url, loginUiElem, window.location.host);
         }
+        setCache(cache)
     }
     )
 })();
