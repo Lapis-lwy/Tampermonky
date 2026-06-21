@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      11.0
+// @version      11.1
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -93,7 +93,7 @@ class Cache {
         }
     }
 }
-const cache = new Cache().loadFromStorage();
+const cache = (new Cache()).loadFromStorage();
 console.log(`📦 缓存已加载: ${cache.data.length} 条数据`);
 
 function getCache() {
