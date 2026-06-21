@@ -15,95 +15,6 @@
 // @downloadURL  https://raw.githubusercontent.com/Lapis-lwy/Tampermonky/refs/heads/main/PixivInfo.user.js
 // ==/UserScript==
 //TODO:增加识别图集部分图片
-/////////////////////////////////////////请求缓存////////////////////////////////////////////////////////////
-const CACHE_KEY = "pixivInfoCache";
-const MAX_CACHE_SIZE = 2000;
-//不设过期时间，缓存满了之后从列表最前面删除
-/*缓存：
-            id:(download:0 or 1)
-*/
-class Cache {
-    constructor(data = [], index = {}) {
-        this.data = data
-        this.index = index
-    }
-    //插入尾部
-    push(id, isDownload) {
-        if (!id || isDownload === undefined || isDownload === null) return false
-        if (this.index.hasOwnProperty(id)) {
-            this.index[id] = isDownload;
-            return true
-        }
-        if (this.data.length >= MAX_CACHE_SIZE) {
-            const oldId = this.data.shift();
-            if (oldId) {
-                delete this.index[oldId];
-            }
-        }
-        this.data.push(id)
-        this.index[id] = isDownload
-        return true
-    }
-    //删除头部
-    pop() {
-        if (this.data.length === 0) return undefined;
-        const id = this.data.shift()
-        if (id) {
-            delete this.index[id]
-        }
-        return id
-    }
-    //根据id查找
-    findById(id) {
-        return this.index[id]
-    }
-    //转为json字符串
-    toJSON() {
-        return JSON.stringify({ "data": this.data, "index": this.index })
-    }
-    //json字符串转Cache
-    fromJSON(json) {
-        try {
-            const res = JSON.parse(json)
-            this.data = res["data"]
-            this.index = res["index"]
-        } catch (e) {
-            console.warn('解析缓存失败', e);
-            this.data = [];
-            this.index = {};
-            return this
-        }
-        return this
-    }
-    loadFromStorage() {
-        try {
-            const raw = GM_getValue(CACHE_KEY, "{}");
-            return this.fromJSON(raw);
-        } catch (e) {
-            console.warn("读取缓存失败", e);
-            this.data = [];
-            this.index = {};
-            return this;
-        }
-    }
-    save() {
-        try {
-            GM_setValue(CACHE_KEY, this.toJSON());
-        } catch (e) {
-            console.warn("缓存保存失败", e);
-        }
-    }
-}
-let cache = new Cache().loadFromStorage();
-console.log(`📦 缓存已加载: ${cache.data.length} 条数据`);
-
-function getCache() {
-    return cache
-}
-function setCache(cacheInstance) {
-    cacheInstance.save();
-}
-///////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 let _wr = function (type) {
     let orig = history[type];
@@ -271,10 +182,6 @@ async function search(url) {
     return await sendReq(url, flag, picId);
 }
 function sendReq(url, flag, picId) {
-    if (cache.findById(picId) != undefined) {
-        GM_setValue("download", cache.findById(picId));
-        return new Promise((res) => { res(1) })
-    }
     return new Promise((res, rej) => {
         GM_xmlhttpRequest({
             method: "GET", url: url + "?query=" + picId + "&sources=Image",
@@ -296,7 +203,6 @@ function sendReq(url, flag, picId) {
                     }
                 }
                 GM_setValue("download", download);
-                cache.push(picId, download)
                 res(download);
             },
             onerror: (error) => {
@@ -423,7 +329,6 @@ function infoList(url, loginUiElem, hostName) {
         else
             infoList(url, loginUiElem, window.location.host);
     }
-    setCache(cache)
     history.pushState = _wr('pushState');
     window.addEventListener('pushState', function () {
         console.warn("href changed to " + window.location.href)
@@ -442,7 +347,6 @@ function infoList(url, loginUiElem, hostName) {
             else
                 infoList(url, loginUiElem, window.location.host);
         }
-        setCache(cache)
     }
     )
 })();
