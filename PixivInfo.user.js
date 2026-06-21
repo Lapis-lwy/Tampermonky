@@ -71,6 +71,7 @@ class Cache {
             console.warn('解析缓存失败', e);
             this.data = [];
             this.index = {};
+            return this
         }
         return this
     }
