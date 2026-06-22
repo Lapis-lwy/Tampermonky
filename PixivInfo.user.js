@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      12.0
+// @version      12.1
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -127,6 +127,7 @@ function loginUi(div) {
     user.type = "text";
     user.id = "username";
     user.placeholder = "请输入用户名";
+    user.autocomplete = "off";
     user.style.cssText = `
         width: 100%; padding: 8px 10px;
         border: 1px solid #ddd; border-radius: 4px;
@@ -525,6 +526,9 @@ function infoList(url, loginUiElem, hostName) {
         }
         loginEvent(url, loginUiElem, () => { listEvent(url) });
     };
+}
+function renewFolder(url) {
+
 }
 (function () {
     'use strict';
