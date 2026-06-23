@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      12.3
+// @version      12.4
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -33,7 +33,7 @@ function notify(msg, type = "info") {
         const el = document.createElement("div");
         el.textContent = msg;
         el.style.cssText = `
-            position: fixed; top: 20px; left: 20px; padding: 10px 20px;
+            position: fixed; bottom: 60px; left: 20px; padding: 10px 20px;
             background: ${colors[type] || colors.info}; color: white;
             border-radius: 4px; font-size: 14px; z-index: 10000;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
@@ -44,7 +44,7 @@ function notify(msg, type = "info") {
             el.style.opacity = "0";
             el.style.transition = "opacity 0.3s";
             setTimeout(() => el.remove(), 300);
-        }, 3000);
+        }, 1500);
     }
 function loginUi(div) {
     // 检查登录状态
