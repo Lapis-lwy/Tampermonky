@@ -33,7 +33,7 @@ function notify(msg, type = "info") {
         const el = document.createElement("div");
         el.textContent = msg;
         el.style.cssText = `
-            position: fixed; bottom: 20px; left: 20px; padding: 10px 20px;
+            position: fixed; top: 20px; left: 20px; padding: 10px 20px;
             background: ${colors[type] || colors.info}; color: white;
             border-radius: 4px; font-size: 14px; z-index: 10000;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
