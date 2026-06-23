@@ -26,7 +26,7 @@ let _wr = function (type) {
         return rv;
     };
 };
-let noneArr = [undefined, ""];
+let noneArr = [undefined,null, ""];
     // 显示通知
 function notify(msg, type = "info") {
         const colors = { success: "#4CAF50", error: "#f44336", warning: "#ff9800", info: "#2196F3" };
