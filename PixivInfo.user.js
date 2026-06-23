@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      12.2
+// @version      12.3
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -27,16 +27,8 @@ let _wr = function (type) {
     };
 };
 let noneArr = [undefined, ""];
-function loginUi(div) {
-    // 检查登录状态
-    function isLoggedIn() {
-        if (typeof GM_getValue !== 'function') return false;
-        const u = GM_getValue("username"), p = GM_getValue("password");
-        return u && u.trim() && p && p.trim();
-    }
-
     // 显示通知
-    function notify(msg, type = "info") {
+function notify(msg, type = "info") {
         const colors = { success: "#4CAF50", error: "#f44336", warning: "#ff9800", info: "#2196F3" };
         const el = document.createElement("div");
         el.textContent = msg;
@@ -53,6 +45,13 @@ function loginUi(div) {
             el.style.transition = "opacity 0.3s";
             setTimeout(() => el.remove(), 300);
         }, 3000);
+    }
+function loginUi(div) {
+    // 检查登录状态
+    function isLoggedIn() {
+        if (typeof GM_getValue !== 'function') return false;
+        const u = GM_getValue("username"), p = GM_getValue("password");
+        return u && u.trim() && p && p.trim();
     }
 
     // 创建主容器
