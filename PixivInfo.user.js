@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      12.1
+// @version      12.2
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -528,7 +528,13 @@ function infoList(url, loginUiElem, hostName) {
     };
 }
 function renewFolder(url) {
-
+    let path=["/mobile/Normal","/mobile/R-18","/pc/Normal","/pc/R-18"]
+    for(let i=0;i<path.length;i++)
+        GM_xmlhttpRequest({
+        url: url+"/resources?path="+path[i]+"&source=Image",
+        method: "PUT",
+        cookie: "filebrowser_quantum_jwt=" + GM_getValue("auth")
+    });
 }
 (function () {
     'use strict';
@@ -539,6 +545,7 @@ function renewFolder(url) {
     div.style.backgroundColor = "white";
     div.id = "infoDisplay";
     let loginUiElem = loginUi(div);
+    renewFolder(url);
     document.body.prepend(div);
     let regexDanbooru = /posts/;
     let regexPixiv = /(tags|artworks)/;
