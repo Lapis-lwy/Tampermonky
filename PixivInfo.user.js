@@ -530,7 +530,7 @@ function renewFolder(url) {
     for(let i=0;i<path.length;i++)
         GM_xmlhttpRequest({
         url: url+"/resources?path="+path[i]+"&source=Image",
-        method: "PUT",
+        method: "GET",
         cookie: "filebrowser_quantum_jwt=" + GM_getValue("auth")
     });
 }
