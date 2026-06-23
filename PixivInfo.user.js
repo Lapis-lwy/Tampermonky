@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      12.4
+// @version      12.5
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -559,6 +559,7 @@ function renewFolder(url) {
     history.pushState = _wr('pushState');
     window.addEventListener('pushState', function () {
         console.warn("href changed to " + window.location.href)
+        renewFolder(url);
         if (tip != null) {
             tip.remove()
             tip = null
