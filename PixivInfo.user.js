@@ -33,7 +33,7 @@ function notify(msg, type = "info") {
         const el = document.createElement("div");
         el.textContent = msg;
         el.style.cssText = `
-            position: fixed; bottom: 20px; right: 20px; padding: 10px 20px;
+            position: fixed; bottom: 20px; left: 20px; padding: 10px 20px;
             background: ${colors[type] || colors.info}; color: white;
             border-radius: 4px; font-size: 14px; z-index: 10000;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
@@ -313,7 +313,6 @@ function loginRes(login, loginUiElem) {
         loginUiElem.loginBtn.onmouseout = () => loginUiElem.loginBtn.style.background = "#4CAF50";
 
         loginUiElem.loginBox.style.display = "none";
-
         notify("✅ 登录成功！", "success");
     }, (rej) => {
         if (rej === 502) {
