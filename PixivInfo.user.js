@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      13.8
+// @version      14.0
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -445,7 +445,6 @@ function createTip() {
     };
 }
 let clickEvent = (url, tipObj) => {
-    const noneArr = [undefined, null, ""];
     if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password"))) {
         tipObj.show("⚠️ 您还未登录！", "#ff9800", "#ff9800");
         return;
@@ -560,6 +559,8 @@ async function searchList(url, href) {
     }
 }
 function infoList(url, loginUiElem, hostName) {
+    if(noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
+        return
     const sleep = (ms) => {
         return new Promise(resolve => setTimeout(resolve, ms));
     };
@@ -673,7 +674,7 @@ function renewFolder(url) {
         console.warn("href changed to " + window.location.href)
         renewFolder(url);
         if (tip != null) {
-            tip.remove()
+            tip.element.remove()
             tip = null
         }
         let path = window.location.pathname
@@ -693,7 +694,7 @@ function renewFolder(url) {
         console.warn("href changed to " + window.location.href)
         renewFolder(url);
         if (tip != null) {
-            tip.remove()
+            tip.element.remove()
             tip = null
         }
         let path = window.location.pathname
