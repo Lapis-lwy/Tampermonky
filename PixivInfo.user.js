@@ -349,30 +349,54 @@ function createTip() {
     tip.style.display = "none";
 
     // 与登录按钮保持一致的风格
-    tip.style.cssText = `
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        margin: 0px;
-        padding: 10px 24px;
-        font-size: 14px;
-        font-weight: normal;
-        text-align: center;
-        background: rgba(255,255,255,0.95);
-        color: #333;
-        border: 1px solid #ddd;
-        border-radius: 25px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        z-index: 9999;
-        max-width: 500px;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
-        pointer-events: none;
-        white-space: nowrap;
-        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    `;
-
+    if (window.location.host="www.pixiv.net")
+        tip.style.cssText = `
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            margin: 0px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: normal;
+            text-align: center;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 9999;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        `;
+    else
+        tip.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            margin: 0px;
+            padding: 10px 24px;
+            font-size: 14px;
+            font-weight: normal;
+            text-align: center;
+            background: rgba(255,255,255,0.95);
+            color: #333;
+            border: 1px solid #ddd;
+            border-radius: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            z-index: 9999;
+            max-width: 500px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+            white-space: nowrap;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        `;
     document.body.appendChild(tip);
     return tip;
 }
