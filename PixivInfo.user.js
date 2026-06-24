@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      12.5
+// @version      12.6
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -341,29 +341,79 @@ function loginEvent(url, loginUiElem, event) {
             event()
     });
 }
-function infoUi(div, url, loginUiElem) {
+// 独立的tip创建函数 - 定位到图片左上方中间位置
+function createTip(imageId) {
     let tip = document.createElement("h2");
     tip.style.textAlign = "center";
     tip.style.margin = "0px";
-    tip.style.padding = "12px";
+    tip.style.padding = "6px 12px";
+    tip.style.fontSize = "13px";
+    tip.style.fontWeight = "normal";
     tip.id = "tip";
-    div.append(tip);
-    let clickEvent = (url, tip) => {
-        if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password"))) {
-            tip.textContent = "⚠️您还未登录！";
-            return;
+    tip.style.display = "none";
+    tip.style.position = "absolute";
+    tip.style.background = "rgba(255,255,255,0.95)";
+    tip.style.borderRadius = "6px";
+    tip.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
+    tip.style.zIndex = "9997";
+    tip.style.maxWidth = "280px";
+    tip.style.border = "1px solid #ddd";
+    tip.style.pointerEvents = "none";
+    tip.style.transform = "translateX(-50%)"; // 水平居中
+
+    // 定位到图片左上方中间
+    const image = document.getElementsByClassName(imageId)[0];
+    if (image) {
+        // 将tip添加到图片的父容器中
+        if (image.parentNode) {
+            image.parentNode.style.position = "relative";
+            image.parentNode.appendChild(tip);
+        } else {
+            document.body.appendChild(tip);
         }
-        search(url + "tools/search").then(() => {
-            if (GM_getValue("download") === 0) {
-                tip.textContent = "✔️本图片尚未下载";
-                tip.style.color = "green";
-            }
-            if (GM_getValue("download") === 1) {
-                tip.textContent = "❌️本图片已下载";
-                tip.style.color = "red";
-            }
-        })
+
+        // 定位到左上方中间：水平居中，垂直在顶部
+        tip.style.left = "50%";
+        tip.style.top = "10px";
+        tip.style.position = "absolute";
+    } else {
+        // 如果找不到图片，作为备用方案添加到body
+        document.body.appendChild(tip);
+        tip.style.position = "fixed";
+        tip.style.top = "20px";
+        tip.style.left = "50%";
+        tip.style.transform = "translateX(-50%)";
     }
+
+    return tip;
+}
+let clickEvent = (url, tip) => {
+    const noneArr = [undefined, null, ""];
+    if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password"))) {
+        tip.textContent = "⚠️ 您还未登录！";
+        tip.style.color = "#ff9800";
+        tip.style.display = "block";
+        return;
+    }
+    search(url + "tools/search").then(() => {
+        if (GM_getValue("download") === 0) {
+            tip.textContent = "✅ 本图片尚未下载";
+            tip.style.color = "#4CAF50";
+            tip.style.display = "block";
+        }
+        if (GM_getValue("download") === 1) {
+            tip.textContent = "❌ 本图片已下载";
+            tip.style.color = "#f44336";
+            tip.style.display = "block";
+        }
+    }).catch(() => {
+        tip.textContent = "⚠️ 查询失败，请重试";
+        tip.style.color = "#ff9800";
+        tip.style.display = "block";
+    });
+}
+function infoUi(div, url, loginUiElem) {
+    let tip = createTip("sc-8d5ac044-1 pEkOH");
     loginEvent(url, loginUiElem, () => clickEvent(url, tip));
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
