@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      13.7
+// @version      13.8
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -646,26 +646,6 @@ function renewFolder(url) {
             cookie: "filebrowser_quantum_jwt=" + GM_getValue("auth")
         });
 }
-function renewUi(tip,url) {
-    console.warn("href changed to " + window.location.href)
-    renewFolder(url);
-    if (tip != null) {
-        tip.remove()
-        tip = null
-    }
-    let path = window.location.pathname
-    let regexDanbooru = /posts/;
-    let regexPixiv = /(tags|artworks)/;
-    if (regexDanbooru.test(path) || regexPixiv.test(path)) {
-        regexDanbooru = /posts\//;
-        regexPixiv = /artworks/;
-        if (regexDanbooru.test(path) || regexPixiv.test(path))
-            tip = infoUi(url, loginUiElem);
-        else
-            infoList(url, loginUiElem, window.location.host);
-    }
-    return tip;
-}
 (function () {
     'use strict';
     GM_setValue("auth", "");
@@ -689,6 +669,44 @@ function renewUi(tip,url) {
             infoList(url, loginUiElem, window.location.host);
     }
     history.pushState = _wr('pushState');
-    window.addEventListener('pushState', renewUi(tip,url))
+    window.addEventListener('pushState', function () {
+        console.warn("href changed to " + window.location.href)
+        renewFolder(url);
+        if (tip != null) {
+            tip.remove()
+            tip = null
+        }
+        let path = window.location.pathname
+        let regexDanbooru = /posts/;
+        let regexPixiv = /(tags|artworks)/;
+        if (regexDanbooru.test(path) || regexPixiv.test(path)) {
+            regexDanbooru = /posts\//;
+            regexPixiv = /artworks/;
+            if (regexDanbooru.test(path) || regexPixiv.test(path))
+                tip = infoUi(url, loginUiElem);
+            else
+                infoList(url, loginUiElem, window.location.host);
+        }
+    }
+    )
+    window.addEventListener('popstate', function () {
+        console.warn("href changed to " + window.location.href)
+        renewFolder(url);
+        if (tip != null) {
+            tip.remove()
+            tip = null
+        }
+        let path = window.location.pathname
+        let regexDanbooru = /posts/;
+        let regexPixiv = /(tags|artworks)/;
+        if (regexDanbooru.test(path) || regexPixiv.test(path)) {
+            regexDanbooru = /posts\//;
+            regexPixiv = /artworks/;
+            if (regexDanbooru.test(path) || regexPixiv.test(path))
+                tip = infoUi(url, loginUiElem);
+            else
+                infoList(url, loginUiElem, window.location.host);
+        }
+    })
 })();
 
