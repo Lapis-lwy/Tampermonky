@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      13.2
+// @version      13.3
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -344,82 +344,74 @@ function loginEvent(url, loginUiElem, event) {
 function createTip() {
     let tip = document.createElement("h2");
     tip.id = "tip";
-    if (window.location.host==="www.pixiv.net")
-        tip.style.cssText = `
-            position: fixed;
-            top: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            margin: 0px;
-            padding: 10px 24px;
-            font-size: 14px;
-            font-weight: normal;
-            text-align: center;
-            background: rgba(255,255,255,0.95);
-            color: #333;
-            border: 1px solid #ddd;
-            border-radius: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            z-index: 9999;
-            max-width: 500px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            pointer-events: auto;
-            user-select: none;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: none;
-        `;
-    else
-        tip.style.cssText = `
-            position: fixed;
-            top: 5px;
-            left: 50%;
-            transform: translateX(-50%);
-            margin: 0px;
-            padding: 10px 24px;
-            font-size: 14px;
-            font-weight: normal;
-            text-align: center;
-            background: rgba(255,255,255,0.95);
-            color: #333;
-            border: 1px solid #ddd;
-            border-radius: 25px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            z-index: 9999;
-            max-width: 500px;
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-            pointer-events: auto;
-            user-select: none;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            display: none;
-        `;
+    tp={"www.pixiv.net":"60","danbooru.donmai.us":"5"}
+    tip.style.cssText = `
+        position: fixed;
+        top: ${tp[window.location.host]}px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0px;
+        padding: 10px 24px;
+        font-size: 14px;
+        font-weight: normal;
+        text-align: center;
+        background: rgba(255,255,255,0.95);
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 9999;
+        max-width: 500px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        pointer-events: auto;
+        user-select: none;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        display: none;
+    `;
+    // 创建删除通知元素（与tip相同位置）
+    let deleteNotify = document.createElement("div");
+    deleteNotify.id = "delete-notify";
+    deleteNotify.textContent = "🗑️ 提示已删除";
+    deleteNotify.style.cssText = `
+        position: fixed;
+        top: ${tp[window.location.host]}px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0px;
+        padding: 10px 24px;
+        font-size: 14px;
+        font-weight: normal;
+        text-align: center;
+        background: #f44336;
+        color: white;
+        border: 1px solid #f44336;
+        border-radius: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 10000;
+        max-width: 500px;
+        backdrop-filter: blur(10px);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+    `;
+    document.body.appendChild(deleteNotify);
     // 长按计时器
     let pressTimer = null;
     let isLongPress = false;
 
-    // 鼠标按下
     tip.addEventListener("mousedown", (e) => {
         isLongPress = false;
         pressTimer = setTimeout(() => {
             isLongPress = true;
-            // 长按消失
+            // 隐藏tip
             tip.style.display = "none";
-            // 显示删除通知
-            const notify = document.createElement("div");
-            notify.textContent = "🗑️ 提示已删除";
-            notify.style.cssText = `
-                position: fixed; bottom: 20px; right: 20px; padding: 10px 20px;
-                background: #f44336; color: white;
-                border-radius: 4px; font-size: 14px; z-index: 10000;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-                animation: slideIn 0.3s ease;
-            `;
-            document.body.appendChild(notify);
+            // 在相同位置显示删除通知
+            deleteNotify.style.opacity = "1";
+            // 2秒后淡出
             setTimeout(() => {
-                notify.style.opacity = "0";
-                notify.style.transition = "opacity 0.3s";
-                setTimeout(() => notify.remove(), 300);
+                deleteNotify.style.opacity = "0";
             }, 2000);
         }, 800); // 长按800ms触发
     });
@@ -468,6 +460,19 @@ let clickEvent = (url, tipObj) => {
     }).catch(() => {
         tipObj.show("⚠️ 查询失败，请重试", "#ff9800", "#ff9800");
     });
+}
+
+// 添加动画样式
+if (!document.getElementById("tip-style")) {
+    const style = document.createElement('style');
+    style.id = "tip-style";
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
 }
 function infoUi(url, loginUiElem) {
     let tip = createTip();
