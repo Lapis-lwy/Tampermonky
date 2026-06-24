@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      12.8
+// @version      13.0
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -343,62 +343,194 @@ function loginEvent(url, loginUiElem, event) {
 }
 // 独立的tip创建函数 - 固定在网页最上方，风格与按钮一致
 function createTip() {
-    let tip = document.createElement("h2");
-    tip.textContent = "";
-    tip.id = "tip";
-    tip.style.display = "none";
-
-    // 与登录按钮保持一致的风格
+    // 创建tip容器
+    let tipContainer = document.createElement("div");
+    tipContainer.id = "tip-container";
     if (window.location.host==="www.pixiv.net")
-        tip.style.cssText = `
+        tipContainer.style.cssText = `
             position: fixed;
             top: 60px;
             left: 50%;
             transform: translateX(-50%);
-            margin: 0px;
-            padding: 10px 24px;
-            font-size: 14px;
-            font-weight: normal;
-            text-align: center;
+            z-index: 9999;
+            display: none;
+            max-width: 600px;
+            min-width: 200px;
             background: rgba(255,255,255,0.95);
-            color: #333;
-            border: 1px solid #ddd;
             border-radius: 25px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            z-index: 9999;
-            max-width: 500px;
+            border: 1px solid #ddd;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
-            pointer-events: none;
-            white-space: nowrap;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         `;
     else
-        tip.style.cssText = `
+        tipContainer.style.cssText = `
             position: fixed;
-            top: 20px;
+            top: 5px;
             left: 50%;
             transform: translateX(-50%);
-            margin: 0px;
-            padding: 10px 24px;
-            font-size: 14px;
-            font-weight: normal;
-            text-align: center;
+            z-index: 9999;
+            display: none;
+            max-width: 600px;
+            min-width: 200px;
             background: rgba(255,255,255,0.95);
-            color: #333;
-            border: 1px solid #ddd;
             border-radius: 25px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            z-index: 9999;
-            max-width: 500px;
+            border: 1px solid #ddd;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
-            pointer-events: none;
-            white-space: nowrap;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
         `;
-    document.body.appendChild(tip);
-    return tip;
+
+    // 内容区域
+    let tipContent = document.createElement("div");
+    tipContent.style.cssText = `
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 16px;
+        gap: 12px;
+    `;
+
+    // 文本区域
+    let tipText = document.createElement("span");
+    tipText.id = "tip";
+    tipText.style.cssText = `
+        flex: 1;
+        font-size: 14px;
+        color: #333;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    `;
+    tipContent.appendChild(tipText);
+
+    // 按钮组
+    let btnGroup = document.createElement("div");
+    btnGroup.style.cssText = `
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+    `;
+
+    // 折叠按钮
+    let foldBtn = document.createElement("button");
+    foldBtn.innerHTML = "−";
+    foldBtn.title = "折叠提示";
+    foldBtn.style.cssText = `
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        color: #666;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    foldBtn.onmouseover = () => {
+        foldBtn.style.background = "rgba(0,0,0,0.05)";
+    };
+    foldBtn.onmouseout = () => {
+        foldBtn.style.background = "transparent";
+    };
+
+    // 删除按钮
+    let closeBtn = document.createElement("button");
+    closeBtn.innerHTML = "×";
+    closeBtn.title = "关闭提示";
+    closeBtn.style.cssText = `
+        width: 24px;
+        height: 24px;
+        padding: 0;
+        border: none;
+        border-radius: 50%;
+        background: transparent;
+        color: #999;
+        cursor: pointer;
+        font-size: 20px;
+        line-height: 1;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+    closeBtn.onmouseover = () => {
+        closeBtn.style.background = "rgba(244, 67, 54, 0.1)";
+        closeBtn.style.color = "#f44336";
+    };
+    closeBtn.onmouseout = () => {
+        closeBtn.style.background = "transparent";
+        closeBtn.style.color = "#999";
+    };
+
+    btnGroup.appendChild(foldBtn);
+    btnGroup.appendChild(closeBtn);
+    tipContent.appendChild(btnGroup);
+    tipContainer.appendChild(tipContent);
+
+    // 折叠状态
+    let isFolded = false;
+    let tipTextContent = "";
+
+    // 折叠功能
+    foldBtn.onclick = () => {
+        isFolded = !isFolded;
+        if (isFolded) {
+            foldBtn.innerHTML = "+";
+            foldBtn.title = "展开提示";
+            tipText.style.whiteSpace = "normal";
+            tipText.style.overflow = "visible";
+            tipText.style.textOverflow = "clip";
+            tipText.style.fontSize = "12px";
+            tipContainer.style.minWidth = "80px";
+        } else {
+            foldBtn.innerHTML = "−";
+            foldBtn.title = "折叠提示";
+            tipText.style.whiteSpace = "nowrap";
+            tipText.style.overflow = "hidden";
+            tipText.style.textOverflow = "ellipsis";
+            tipText.style.fontSize = "14px";
+            tipContainer.style.minWidth = "200px";
+        }
+    };
+
+    // 删除功能
+    closeBtn.onclick = () => {
+        tipContainer.style.display = "none";
+    };
+
+    document.body.appendChild(tipContainer);
+
+    // 返回操作对象
+    return {
+        element: tipContainer,
+        text: tipText,
+        show: function(msg, color = "#333", borderColor = "#ddd") {
+            tipText.textContent = msg;
+            tipText.style.color = color;
+            tipContainer.style.borderColor = borderColor;
+            tipContainer.style.display = "block";
+            // 如果是折叠状态，重置
+            if (isFolded) {
+                foldBtn.click();
+            }
+        },
+        hide: function() {
+            tipContainer.style.display = "none";
+        },
+        setColor: function(color) {
+            tipText.style.color = color;
+            tipContainer.style.borderColor = color;
+        }
+    };
 }
 let clickEvent = (url, tip) => {
     const noneArr = [undefined, null, ""];
@@ -426,16 +558,16 @@ let clickEvent = (url, tip) => {
     });
 }
 function infoUi(url, loginUiElem) {
-    let tip = createTip("sc-8d5ac044-1 pEkOH");
-    loginEvent(url, loginUiElem, () => clickEvent(url, tip));
+    let tip = createTip();
+    loginEvent(url, loginUiElem, () => clickEvent(url, tip.element));
     loginUiElem.buttonElem.onclick = () => {
         if (loginUiElem.userElem.value === "" || loginUiElem.passwordElem.value === "") {
             alert("输入框为空！");
             return;
         }
-        loginEvent(url, loginUiElem, () => clickEvent(url, tip));
+        loginEvent(url, loginUiElem, () => clickEvent(url, tip.element));
     };
-    return tip;
+    return tip.element;
 }
 async function search(url) {
     let flag = -1;
