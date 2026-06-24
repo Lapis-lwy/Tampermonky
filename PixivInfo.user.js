@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      13.3
+// @version      13.4
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -412,7 +412,7 @@ function createTip() {
             // 2秒后淡出
             setTimeout(() => {
                 deleteNotify.style.opacity = "0";
-            }, 2000);
+            }, 1000);
         }, 800); // 长按800ms触发
     });
 
