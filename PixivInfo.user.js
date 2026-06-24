@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      12.6
+// @version      12.7
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -26,26 +26,26 @@ let _wr = function (type) {
         return rv;
     };
 };
-let noneArr = [undefined,null, ""];
-    // 显示通知
+let noneArr = [undefined, null, ""];
+// 显示通知
 function notify(msg, type = "info") {
-        const colors = { success: "#4CAF50", error: "#f44336", warning: "#ff9800", info: "#2196F3" };
-        const el = document.createElement("div");
-        el.textContent = msg;
-        el.style.cssText = `
+    const colors = { success: "#4CAF50", error: "#f44336", warning: "#ff9800", info: "#2196F3" };
+    const el = document.createElement("div");
+    el.textContent = msg;
+    el.style.cssText = `
             position: fixed; bottom: 60px; left: 20px; padding: 10px 20px;
             background: ${colors[type] || colors.info}; color: white;
             border-radius: 4px; font-size: 14px; z-index: 10000;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
             animation: slideIn 0.3s ease;
         `;
-        document.body.appendChild(el);
-        setTimeout(() => {
-            el.style.opacity = "0";
-            el.style.transition = "opacity 0.3s";
-            setTimeout(() => el.remove(), 300);
-        }, 1500);
-    }
+    document.body.appendChild(el);
+    setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transition = "opacity 0.3s";
+        setTimeout(() => el.remove(), 300);
+    }, 1500);
+}
 function loginUi(div) {
     // 检查登录状态
     function isLoggedIn() {
@@ -341,50 +341,39 @@ function loginEvent(url, loginUiElem, event) {
             event()
     });
 }
-// 独立的tip创建函数 - 定位到图片左上方中间位置
-function createTip(imageId) {
+// 独立的tip创建函数 - 固定在网页最上方，风格与按钮一致
+function createTip() {
     let tip = document.createElement("h2");
-    tip.style.textAlign = "center";
-    tip.style.margin = "0px";
-    tip.style.padding = "6px 12px";
-    tip.style.fontSize = "13px";
-    tip.style.fontWeight = "normal";
+    tip.textContent = "";
     tip.id = "tip";
     tip.style.display = "none";
-    tip.style.position = "absolute";
-    tip.style.background = "rgba(255,255,255,0.95)";
-    tip.style.borderRadius = "6px";
-    tip.style.boxShadow = "0 2px 8px rgba(0,0,0,0.15)";
-    tip.style.zIndex = "9997";
-    tip.style.maxWidth = "280px";
-    tip.style.border = "1px solid #ddd";
-    tip.style.pointerEvents = "none";
-    tip.style.transform = "translateX(-50%)"; // 水平居中
 
-    // 定位到图片左上方中间
-    const image = document.getElementsByClassName(imageId)[0];
-    if (image) {
-        // 将tip添加到图片的父容器中
-        if (image.parentNode) {
-            image.parentNode.style.position = "relative";
-            image.parentNode.appendChild(tip);
-        } else {
-            document.body.appendChild(tip);
-        }
+    // 与登录按钮保持一致的风格
+    tip.style.cssText = `
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        margin: 0px;
+        padding: 10px 24px;
+        font-size: 14px;
+        font-weight: normal;
+        text-align: center;
+        background: rgba(255,255,255,0.95);
+        color: #333;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 9999;
+        max-width: 500px;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+        pointer-events: none;
+        white-space: nowrap;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    `;
 
-        // 定位到左上方中间：水平居中，垂直在顶部
-        tip.style.left = "50%";
-        tip.style.top = "10px";
-        tip.style.position = "absolute";
-    } else {
-        // 如果找不到图片，作为备用方案添加到body
-        document.body.appendChild(tip);
-        tip.style.position = "fixed";
-        tip.style.top = "20px";
-        tip.style.left = "50%";
-        tip.style.transform = "translateX(-50%)";
-    }
-
+    document.body.appendChild(tip);
     return tip;
 }
 let clickEvent = (url, tip) => {
@@ -412,7 +401,7 @@ let clickEvent = (url, tip) => {
         tip.style.display = "block";
     });
 }
-function infoUi(div, url, loginUiElem) {
+function infoUi(url, loginUiElem) {
     let tip = createTip("sc-8d5ac044-1 pEkOH");
     loginEvent(url, loginUiElem, () => clickEvent(url, tip));
     loginUiElem.buttonElem.onclick = () => {
@@ -576,13 +565,13 @@ function infoList(url, loginUiElem, hostName) {
     };
 }
 function renewFolder(url) {
-    let path=["/mobile/Normal","/mobile/R-18","/pc/Normal","/pc/R-18"]
-    for(let i=0;i<path.length;i++)
+    let path = ["/mobile/Normal", "/mobile/R-18", "/pc/Normal", "/pc/R-18"]
+    for (let i = 0; i < path.length; i++)
         GM_xmlhttpRequest({
-        url: url+"/resources?path="+path[i]+"&source=Image",
-        method: "GET",
-        cookie: "filebrowser_quantum_jwt=" + GM_getValue("auth")
-    });
+            url: url + "/resources?path=" + path[i] + "&source=Image",
+            method: "GET",
+            cookie: "filebrowser_quantum_jwt=" + GM_getValue("auth")
+        });
 }
 (function () {
     'use strict';
@@ -602,7 +591,7 @@ function renewFolder(url) {
         regexDanbooru = /posts\//;
         regexPixiv = /artworks/;
         if (regexDanbooru.test(path) || regexPixiv.test(path))
-            tip = infoUi(div, url, loginUiElem);
+            tip = infoUi(url, loginUiElem);
         else
             infoList(url, loginUiElem, window.location.host);
     }
@@ -621,7 +610,7 @@ function renewFolder(url) {
             regexDanbooru = /posts\//;
             regexPixiv = /artworks/;
             if (regexDanbooru.test(path) || regexPixiv.test(path))
-                tip = infoUi(div, url, loginUiElem);
+                tip = infoUi(url, loginUiElem);
             else
                 infoList(url, loginUiElem, window.location.host);
         }
