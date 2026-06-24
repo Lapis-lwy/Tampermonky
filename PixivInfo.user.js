@@ -349,7 +349,7 @@ function createTip() {
     tip.style.display = "none";
 
     // 与登录按钮保持一致的风格
-    if (window.location.host=="www.pixiv.net")
+    if (window.location.host==="www.pixiv.net")
         tip.style.cssText = `
             position: fixed;
             top: 60px;
