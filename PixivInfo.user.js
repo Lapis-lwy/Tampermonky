@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      13.4
+// @version      13.5
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -344,7 +344,7 @@ function loginEvent(url, loginUiElem, event) {
 function createTip() {
     let tip = document.createElement("h2");
     tip.id = "tip";
-    tp={"www.pixiv.net":"60","danbooru.donmai.us":"5"}
+    let tp={"www.pixiv.net":"60","danbooru.donmai.us":"5"}
     tip.style.cssText = `
         position: fixed;
         top: ${tp[window.location.host]}px;
@@ -409,7 +409,7 @@ function createTip() {
             tip.style.display = "none";
             // 在相同位置显示删除通知
             deleteNotify.style.opacity = "1";
-            // 2秒后淡出
+            // 1秒后淡出
             setTimeout(() => {
                 deleteNotify.style.opacity = "0";
             }, 1000);
