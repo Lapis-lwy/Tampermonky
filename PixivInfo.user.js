@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      13.1
+// @version      13.2
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -364,7 +364,7 @@ function createTip() {
             max-width: 500px;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
-            pointer-events: none;
+            pointer-events: auto;
             user-select: none;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             display: none;
@@ -389,7 +389,7 @@ function createTip() {
             max-width: 500px;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
-            pointer-events: none;
+            pointer-events: auto;
             user-select: none;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             display: none;
