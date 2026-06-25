@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      14.0
+// @version      14.1
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -217,6 +217,7 @@ function loginUi(div) {
         user.value = "";
         passwd.value = "";
         notify("已登出", "info");
+
     }
 
     // 点击登录按钮切换弹窗
@@ -598,6 +599,7 @@ function infoList(url, loginUiElem, hostName) {
                             if (elem)
                                 elem.remove()
                             status.id = "status_" + i;
+                            status.className="local_pic_status";
                             res1[i].parentNode.append(status);
                         });
                     }
@@ -618,6 +620,7 @@ function infoList(url, loginUiElem, hostName) {
                             if (elem)
                                 elem.remove()
                             status.id = "status_" + i;
+                            status.className="local_pic_status";
                             status.style.position = "absolute";
                             status.style.backgroundColor = "white";
                             status.style.fontSize = "17.5px";
