@@ -217,9 +217,10 @@ function loginUi(div) {
         user.value = "";
         passwd.value = "";
         elements=document.getElementsByClassName("local_pic_status");
-        elements.forEach(element => {
-            element.remove();
-        });
+        if (!noneArr.includes(elements))
+            elements.forEach(element => {
+                element.remove();
+            });
         notify("已登出", "info");
 
     }
