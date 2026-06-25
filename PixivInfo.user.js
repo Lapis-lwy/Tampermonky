@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      14.4
+// @version      14.5
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -202,6 +202,11 @@ function loginUi(div) {
             notify("请输入用户名和密码", "warning");
             return;
         }
+        // 直接调用登录事件
+        loginEvent(url, loginUiElem, () => {
+            // 登录成功后的回调
+            clickEvent(url, tip);
+        });
     }
 
     function handleLogout() {
@@ -687,6 +692,7 @@ function renewFolder(url) {
         console.warn("href changed to " + window.location.href)
         renewFolder(url);
         if (tip != null) {
+            tip.element.replaceWith(tip.element.cloneNode(true));
             tip.element.remove()
             tip = null
         }
@@ -708,6 +714,7 @@ function renewFolder(url) {
         renewFolder(url);
         if (tip != null) {
             tip.element.remove()
+            tip.element.replaceWith(tip.element.cloneNode(true));
             tip = null
         }
         let path = window.location.pathname
