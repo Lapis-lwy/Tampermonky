@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      14.2
+// @version      14.3
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -216,11 +216,11 @@ function loginUi(div) {
 
         user.value = "";
         passwd.value = "";
-        elements=document.getElementsByClassName("local_pic_status");
+        let elements=document.getElementsByClassName("local_pic_status");
         if (!noneArr.includes(elements))
-            elements.forEach(element => {
-                element.remove();
-            });
+            for (const element of elements){
+        element.remove();
+        }
         notify("已登出", "info");
 
     }
