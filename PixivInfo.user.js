@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      14.10
+// @version      14.11
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -203,11 +203,11 @@ function loginUi(div) {
             notify("请输入用户名和密码", "warning");
             return;
         }
+        let tip = document.getElementById("tip");
+        tip.remove()
+        tip = createTip()
         // 直接调用登录事件
         loginEvent(url, { userElem: user, passwordElem: passwd, buttonElem: btn, loginElem: log, loginBtn: loginBtn, loginBox: loginBox }, () => {
-            let tip = document.getElementById("tip");
-            tip.remove()
-            tip = createTip()
             clickEvent(url, tip)
         });
     }
