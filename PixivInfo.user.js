@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      14.6
+// @version      14.7
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -204,7 +204,7 @@ function loginUi(div) {
             return;
         }
         // 直接调用登录事件
-        loginEvent(url, loginUiElem, () => {
+        loginEvent(url, { userElem: user, passwordElem: passwd, buttonElem: btn, loginElem: log, loginBtn: loginBtn, loginBox: loginBox }, () => {
             // 登录成功后的回调
             clickEvent(url, tip);
         });
