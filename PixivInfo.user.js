@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      14.3
+// @version      14.4
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -216,10 +216,15 @@ function loginUi(div) {
 
         user.value = "";
         passwd.value = "";
-        let elements=document.getElementsByClassName("local_pic_status");
-        if (!noneArr.includes(elements))
-            for (const element of elements){
-        element.remove();
+        let elements = document.getElementsByClassName("local_pic_status");
+        if (elements && elements.length > 0) {
+            // 将HTMLCollection转为数组，避免动态变化问题
+            const elementArray = Array.from(elements);
+            for (const element of elementArray) {
+                if (element && element.parentNode) {
+                    element.parentNode.removeChild(element);
+                }
+            }
         }
         notify("已登出", "info");
 
@@ -565,7 +570,7 @@ async function searchList(url, href) {
     }
 }
 function infoList(url, loginUiElem, hostName) {
-    if(noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
+    if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
         return
     const sleep = (ms) => {
         return new Promise(resolve => setTimeout(resolve, ms));
@@ -604,7 +609,7 @@ function infoList(url, loginUiElem, hostName) {
                             if (elem)
                                 elem.remove()
                             status.id = "status_" + i;
-                            status.className="local_pic_status";
+                            status.className = "local_pic_status";
                             res1[i].parentNode.append(status);
                         });
                     }
@@ -625,7 +630,7 @@ function infoList(url, loginUiElem, hostName) {
                             if (elem)
                                 elem.remove()
                             status.id = "status_" + i;
-                            status.className="local_pic_status";
+                            status.className = "local_pic_status";
                             status.style.position = "absolute";
                             status.style.backgroundColor = "white";
                             status.style.fontSize = "17.5px";
