@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      14.5
+// @version      14.6
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -27,6 +27,7 @@ let _wr = function (type) {
     };
 };
 let noneArr = [undefined, null, ""];
+const url = "https://file.125114.xyz:23475/api/";
 // 显示通知
 function notify(msg, type = "info") {
     const colors = { success: "#4CAF50", error: "#f44336", warning: "#ff9800", info: "#2196F3" };
@@ -670,7 +671,6 @@ function renewFolder(url) {
     GM_setValue("auth", "");
     let div = document.createElement("div");
     let path = window.location.pathname;
-    let url = "https://file.125114.xyz:23475/api/";
     div.style.backgroundColor = "white";
     div.id = "infoDisplay";
     let loginUiElem = loginUi(div);
