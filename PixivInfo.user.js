@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      15.3
+// @version      15.4
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -699,10 +699,9 @@ function renewFolder(url) {
     window.addEventListener('pushState', function () {
         console.warn("href changed to " + window.location.href)
         renewFolder(url);
-        if (tip != null) {
-            tip.element.replaceWith(tip.element.cloneNode(true));
-            tip.element.remove()
-            tip = null
+        let tips = document.getElementById("tip");
+        if (tips != null) {
+            tip.remove()
         }
         let path = window.location.pathname
         let regexDanbooru = /posts/;
@@ -720,10 +719,9 @@ function renewFolder(url) {
     window.addEventListener('popstate', function () {
         console.warn("href changed to " + window.location.href)
         renewFolder(url);
-        if (tip != null) {
-            tip.element.remove()
-            tip.element.replaceWith(tip.element.cloneNode(true));
-            tip = null
+        let tips = document.getElementById("tip");
+        if (tips != null) {
+            tips.remove()
         }
         let path = window.location.pathname
         let regexDanbooru = /posts/;
