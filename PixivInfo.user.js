@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      15.2
+// @version      15.3
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -337,7 +337,6 @@ function loginRes(login, loginUiElem) {
             tip.remove()
             clickEvent(url, createTip())
         }
-        notify("✅ 登录成功！", "success");
     }, (rej) => {
         if (rej === 502) {
             alert("服务器异常，请稍后重试！");
