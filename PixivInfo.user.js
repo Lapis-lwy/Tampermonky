@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         PixivInfo
 // @namespace    http://tampermonkey.net/
-// @version      15.0
+// @version      15.2
 // @description  查看本地是否存在该图片
 // @author       Lapis_lwy
 // @match        *://www.pixiv.net/*
@@ -582,6 +582,8 @@ async function searchList(url, href) {
         return await danbooru(url, id);
     }
 }
+
+
 function infoList(url, loginUiElem, hostName) {
     if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
         return
@@ -608,7 +610,7 @@ function infoList(url, loginUiElem, hostName) {
         if (noneArr.includes(GM_getValue("username")) || noneArr.includes(GM_getValue("password")))
             return;
         if (hostName === "www.pixiv.net") {
-            isElementLoaded("div[class='col-span-2']>div>div:nth-of-type(2)>a", 1, 0).then(res1 => {
+            isElementLoaded("a[data-ga4-label='title_link']", 1, 0).then(res1 => {
                 for (let i = 0; i < res1.length; i++) {
                     if (!document.getElementById("status_" + i)) {
                         let status = document.createElement("div");
@@ -684,7 +686,7 @@ function renewFolder(url) {
     renewFolder(url);
     document.body.prepend(div);
     let regexDanbooru = /posts/;
-    let regexPixiv = /(tags|artworks)/;
+    let regexPixiv = /(tags|artworks|users)/;
     let tip = null
     if (regexDanbooru.test(path) || regexPixiv.test(path)) {
         regexDanbooru = /posts\//;
@@ -705,7 +707,7 @@ function renewFolder(url) {
         }
         let path = window.location.pathname
         let regexDanbooru = /posts/;
-        let regexPixiv = /(tags|artworks)/;
+        let regexPixiv = /(tags|artworks|users)/;
         if (regexDanbooru.test(path) || regexPixiv.test(path)) {
             regexDanbooru = /posts\//;
             regexPixiv = /artworks/;
@@ -726,7 +728,7 @@ function renewFolder(url) {
         }
         let path = window.location.pathname
         let regexDanbooru = /posts/;
-        let regexPixiv = /(tags|artworks)/;
+        let regexPixiv = /(tags|artworks|users)/;
         if (regexDanbooru.test(path) || regexPixiv.test(path)) {
             regexDanbooru = /posts\//;
             regexPixiv = /artworks/;
