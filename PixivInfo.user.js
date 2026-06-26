@@ -701,7 +701,7 @@ function renewFolder(url) {
         renewFolder(url);
         let tips = document.getElementById("tip");
         if (tips != null) {
-            tip.remove()
+            tips.remove()
         }
         let path = window.location.pathname
         let regexDanbooru = /posts/;
